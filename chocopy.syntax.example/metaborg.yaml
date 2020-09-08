@@ -1,0 +1,8 @@
+---
+id: org.example:chocopy.syntax.example:0.1.0-SNAPSHOT
+name: chocopy
+dependencies:
+  compile:
+  - org.example:chocopy.syntax:0.1.0-SNAPSHOT
+build:
+  useBuildSystemSpec: true

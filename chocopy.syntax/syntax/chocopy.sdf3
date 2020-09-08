@@ -1,0 +1,20 @@
+module chocopy
+
+imports
+  
+  Common
+
+context-free start-symbols
+  
+  Program
+
+context-free sorts
+
+  Exp
+  Program
+
+context-free syntax
+  
+  Program.Empty = <<Exp>>
+  
+  Exp.INT = <<INT>>
