@@ -1,0 +1,25 @@
+stages:
+- build
+- grade
+
+build:
+  image: maven:3.5.4-jdk-8-slim
+  stage: build
+  only:
+    - /^milestone-.*-develop$/
+  script:
+    - mvn verify
+  cache:
+    paths:
+      - .m2/
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2"
+
+grade:
+  image: gitlab.ewi.tudelft.nl:4242/cs4200/admin/docker-grader:latest
+  stage: grade
+  only:
+    - /^milestone-.*-submission$/
+    - /^milestone-.*-grade$/
+  script:
+    - /grading/run $CI_COMMIT_REF_NAME $CI_PROJECT_DIR
