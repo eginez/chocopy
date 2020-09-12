@@ -73,9 +73,11 @@ context-free syntax
 	Literal.LitFalse	= "False"
 	Literal.Integer 	= <<INT>>
 	Literal.String 		= <<STRING>>
+	//Possible Fix this Literal.IdString	=<<IdString>>
 	
 	Operator.Plus 	= "+"
 	Operator.Minus	= "-"
+	Operator.Mul 	= "*"
 	Operator.Div 	= "//"
 	Operator.Mod	= "%"
 	Operator.Eq		= "=="
@@ -86,7 +88,6 @@ context-free syntax
 	Operator.Lt		= "<"
 	Operator.Is		= "is"
 	
-	//TODO Fix this Literal.IdString	=<<IdString>>
 	
 	
 	
