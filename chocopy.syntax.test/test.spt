@@ -1,6 +1,0 @@
-module test
-
-language chocopy
-start symbol Program
-
-test parse a simple one [[ 1 ]] parse succeeds

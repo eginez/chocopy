@@ -11,10 +11,84 @@ context-free start-symbols
 context-free sorts
 
   Exp
+  Def
+  Stmt
+  SimpleStmt
+  Target
+  Expr
+  ExprConstant
+  MemberExpr
+  IndexExpr
+  Operator
+  Literal
   Program
+  
 
 context-free syntax
   
-  Program.Empty = <<Exp>>
-  
-  Exp.INT = <<INT>>
+	Program.Start = <<SimpleStmt*>>
+
+	Def.Var = ""
+	Def.Func = ""
+	Def.Class = ""
+
+	Stmt.If = ""
+	Stmt.While = "" 
+	Stmt.For = ""
+	Stmt.SimpleStmt = <<SimpleStmt> <NEWLINE>>
+
+	SimpleStmt.Pass = <pass>
+	SimpleStmt.Expression = <<Expr>>
+	SimpleStmt.RetSimpleStmt = <return <Expr?>>
+	// Fix this a,b = 1,2 target+
+	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr?>> 
+
+	Target.Identifier = <<ID>>
+	Target.TargetMember = <<MemberExpr>>
+	Target.TargetIndex = <<IndexExpr>>
+
+	
+	Expr.NotExpr	= <not <Expr>>
+	Expr.And		= <<Expr> and <Expr>>
+	Expr.Or			= <<Expr> or <Expr>>
+	Expr.IfElse		= <<Expr> if <Expr> else <Expr>>
+	Expr.Constant	= <<ExprConstant>>
+	
+	ExprConstant.VarId		= <<ID>>
+	ExprConstant.ExprLit 	= <<Literal>>
+	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
+	ExprConstant.ParenLit 	= <(<Expr>)>
+	ExprConstant.Index		= <<ExprConstant>[<ExprConstant>]>
+	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
+	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
+	ExprConstant.Operaton	= <<ExprConstant> <Operator> <ExprConstant>>
+
+
+	MemberExpr.MemberExpr 	= <<ExprConstant>.<ID>>
+	
+	IndexExpr.IndexExpr		= <<ExprConstant>[<ExprConstant>]>
+	
+	Literal.None 		= "None"
+	Literal.LitTrue 	= "True"
+	Literal.LitFalse	= "False"
+	Literal.Integer 	= <<INT>>
+	Literal.String 		= <<STRING>>
+	
+	Operator.Plus 	= "+"
+	Operator.Minus	= "-"
+	Operator.Div 	= "//"
+	Operator.Mod	= "%"
+	Operator.Eq		= "=="
+	Operator.Uneq	= "!="
+	Operator.GtEq	= ">="
+	Operator.Gt		= ">"
+	Operator.LtEq	= "<="
+	Operator.Lt		= "<"
+	Operator.Is		= "is"
+	
+	//TODO Fix this Literal.IdString	=<<IdString>>
+	
+	
+	
+
+
