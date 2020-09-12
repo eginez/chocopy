@@ -15,6 +15,9 @@ context-free sorts
   Stmt
   SimpleStmt
   Target
+  Declaration
+  TypedVar
+  Type
   Expr
   ExprConstant
   MemberExpr
@@ -40,12 +43,24 @@ context-free syntax
 	SimpleStmt.Pass = <pass>
 	SimpleStmt.Expression = <<Expr>>
 	SimpleStmt.RetSimpleStmt = <return <Expr?>>
-	// Fix this a,b = 1,2 target+
-	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr?>> 
+	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
+	//SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
 
 	Target.Identifier = <<ID>>
 	Target.TargetMember = <<MemberExpr>>
 	Target.TargetIndex = <<IndexExpr>>
+	
+	Declaration.Global 		= <global <ID> <NEWLINE>>
+	Declaration.NonLocal 	= <nonlocal <ID> <NEWLINE>>
+	
+	Type.TypeID = <<ID>>
+	Type.TypeString = <<STRING>>
+	Type.CollectionType = <[<Type>]>
+	
+	
+	TypedVar.TypedVar = <<ID> : <Type>>
+
+	
 
 	
 	Expr.NotExpr	= <not <Expr>>
