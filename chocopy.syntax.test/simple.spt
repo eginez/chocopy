@@ -14,3 +14,10 @@ a == b
 b >= c
 ab
 ]] parse succeeds
+
+test parse comments [[
+#comment one
+## second comment
+[1,2]#something else
+a = b #thir comment
+]] parse succeeds
