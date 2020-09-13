@@ -21,3 +21,7 @@ test parse comments [[
 [1,2]#something else
 a = b #thir comment
 ]] parse succeeds
+
+test keywords [[
+if = a
+]] parse fails
