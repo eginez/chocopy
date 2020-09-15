@@ -101,3 +101,10 @@ def fn(a:int) -> int:
 	a = 2
 	return a
 ]]
+
+
+test class def [[
+class One(Object):
+	a:int = 1
+	
+]] 
