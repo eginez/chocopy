@@ -33,16 +33,21 @@ context-free sorts
   FunctionDeclarations
   FunctionDef
   FunctionBody
+  AllDefinitions
   
 
 context-free syntax
   
-	Program.Statement = <<Stmt*>>
-	Program.FunctionDefinition = <<FunctionDef*>>
+	Program.Start = <<AllDefinitions*> <Stmt*>>
+	
+	AllDefinitions.FunctionDefinition = <<FunctionDef>>
+	AllDefinitions.VarDefinition = <<VarDef>>
+	//TODO
+	//AllDefinitions.ClassDefinition = <<VarDef>>
 
-	Def.Var = ""
-	Def.Func = ""
-	Def.Class = ""
+
+	FunctionDef.FnDef = "def" ID"(" TypedVar ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
+	FunctionBody.FnBody = <<FunctionDeclarations*><Stmt+>>
 
 	//block = NEWLINE INDENT stmt+ DEDENT
 	Block.Block = sts:Stmt+ {layout(align-list sts)}
@@ -85,8 +90,6 @@ context-free syntax
 	FunctionDeclarations.FnVarDef = <<VarDef>> 
 	FunctionDeclarations.FnFnDef = <<FunctionDef>>
 	
-	FunctionDef.FnDef = "def" ID "(" TypedVar ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
-	FunctionBody.FnBody = <<FunctionDeclarations*><Stmt+>>
 	
 	
 
@@ -138,6 +141,7 @@ context-free priorities
 
   {ExprConstant.Times} >
   {ExprConstant.Plus ExprConstant.Minus}
+  
 	
 	
 	

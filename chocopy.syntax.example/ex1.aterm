@@ -1,17 +1,79 @@
-Start(
-  [ For(
-      "a"
-    , Constant(Times(ExprLit(Integer("2")), ExprLit(Integer("3"))))
-    , Block(
-        [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("3")))))]
-      )
+amb(
+  [ amb(
+      [ amb(
+          [ Start(
+              [ FunctionDefinition(
+                  FnDef(
+                    "fn"
+                  , TypedVar("a", TypeID("int"))
+                  , TypeID("int")
+                  , FnBody(
+                      []
+                    , [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
+                      , SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
+                      , SimpleStmt(RetSimpleStmt(None()))
+                      ]
+                    )
+                  )
+                )
+              ]
+            , [SimpleStmt(Expression(Constant(VarId("a"))))]
+            )
+          , Start(
+              [ FunctionDefinition(
+                  FnDef(
+                    "fn"
+                  , TypedVar("a", TypeID("int"))
+                  , TypeID("int")
+                  , FnBody(
+                      []
+                    , [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
+                      , SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
+                      ]
+                    )
+                  )
+                )
+              ]
+            , [SimpleStmt(RetSimpleStmt(Some(Constant(VarId("a")))))]
+            )
+          ]
+        )
+      , Start(
+          [ FunctionDefinition(
+              FnDef(
+                "fn"
+              , TypedVar("a", TypeID("int"))
+              , TypeID("int")
+              , FnBody(
+                  []
+                , [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
+                )
+              )
+            )
+          ]
+        , [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
+          , SimpleStmt(RetSimpleStmt(Some(Constant(VarId("a")))))
+          ]
+        )
+      ]
     )
-  , While(
-      Constant(ExprLit(LitTrue()))
-    , Block(
-        [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
-      )
+  , Start(
+      [ FunctionDefinition(
+          FnDef(
+            "fn"
+          , TypedVar("a", TypeID("int"))
+          , TypeID("int")
+          , FnBody(
+              []
+            , [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
+              , SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
+              , SimpleStmt(RetSimpleStmt(Some(Constant(VarId("a")))))
+              ]
+            )
+          )
+        )
+      ]
+    , []
     )
-  , SimpleStmt(TargetSimpleStmt(Identifier("n"), Constant(ExprLit(Integer("3")))))
   ]
 )

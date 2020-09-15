@@ -94,3 +94,10 @@ while True:
 test bad while [[
 while True:
 ]] parse fails
+
+test simple fn decl [[
+def fn(a:int) -> int:
+	a = 1
+	a = 2
+	return a
+]]
