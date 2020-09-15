@@ -25,48 +25,78 @@ context-free sorts
   Operator
   Literal
   Program
+  Block
+  IfBlock
+  ElseIfBlock
+  ElseBlock
+  VarDef
+  FunctionDeclarations
+  FunctionDef
+  FunctionBody
   
 
 context-free syntax
   
-	Program.Start = <<SimpleStmt*>>
+	Program.Statement = <<Stmt*>>
+	Program.FunctionDefinition = <<FunctionDef*>>
 
 	Def.Var = ""
 	Def.Func = ""
 	Def.Class = ""
 
-	Stmt.If = ""
-	Stmt.While = "" 
-	Stmt.For = ""
-	Stmt.SimpleStmt = <<SimpleStmt> <NEWLINE>>
+	//block = NEWLINE INDENT stmt+ DEDENT
+	Block.Block = sts:Stmt+ {layout(align-list sts)}
+
+	
+	IfBlock.IfBlock = "if" Expr":" blk:Block {layout(newline-indent "if" blk)}
+	ElseBlock.ElseBlock = "else:" blk:Block {layout(newline-indent "else:" blk)}
+	ElifBlock.ElifBlock = "elif" Expr ":" blk:Block {layout(newline-indent "elif" blk)}
+	
+	Stmt.StmtIfElse = ifBlk:IfBlock elseBlk:ElseBlock? {layout(align ifBlk elseBlk)}
+	//TODO
+	//Stmt.StmtIfAll = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
+	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
+	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
+	Stmt.SimpleStmt = <<SimpleStmt>>
+	
 
 	SimpleStmt.Pass = <pass>
 	SimpleStmt.Expression = <<Expr>>
 	SimpleStmt.RetSimpleStmt = <return <Expr?>>
 	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
-	//SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
+	//TODO SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
 
 	Target.Identifier = <<ID>>
 	Target.TargetMember = <<MemberExpr>>
 	Target.TargetIndex = <<IndexExpr>>
 	
-	Declaration.Global 		= <global <ID> <NEWLINE>>
-	Declaration.NonLocal 	= <nonlocal <ID> <NEWLINE>>
-	
 	Type.TypeID = <<ID>>
 	Type.TypeString = <<STRING>>
 	Type.CollectionType = <[<Type>]>
 	
-	
 	TypedVar.TypedVar = <<ID> : <Type>>
+
+	Declaration.Global 		= <global <ID>>
+	Declaration.NonLocal 	= <nonlocal <ID>>
+
+	VarDef.VarDef = <<TypedVar> = <Literal>>
+	
+	FunctionDeclarations.FnLocalGlobals = <<Declaration>>
+	FunctionDeclarations.FnVarDef = <<VarDef>> 
+	FunctionDeclarations.FnFnDef = <<FunctionDef>>
+	
+	FunctionDef.FnDef = "def" ID "(" TypedVar ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
+	FunctionBody.FnBody = <<FunctionDeclarations*><Stmt+>>
+	
+	
 
 	
 
 	
 	Expr.NotExpr	= <not <Expr>>
-	Expr.And		= <<Expr> and <Expr>>
-	Expr.Or			= <<Expr> or <Expr>>
-	Expr.IfElse		= <<Expr> if <Expr> else <Expr>>
+	Expr.And		= <<Expr> and <Expr>>					{left}
+	Expr.Or			= <<Expr> or <Expr>>					{left}
+	Expr.IfElse		= <<Expr> if <Expr> else <Expr>>		{right}
 	Expr.Constant	= <<ExprConstant>>
 	
 	ExprConstant.VarId		= <<ID>>
@@ -76,7 +106,19 @@ context-free syntax
 	ExprConstant.Index		= <<ExprConstant>[<ExprConstant>]>
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
-	ExprConstant.Operaton	= <<ExprConstant> <Operator> <ExprConstant>>
+	ExprConstant.Plus	= <<ExprConstant> + <ExprConstant>>		{left}
+	ExprConstant.Minus	= <<ExprConstant> - <ExprConstant>>		{left}
+	ExprConstant.Times	= <<ExprConstant> * <ExprConstant>>		{left}
+	ExprConstant.Div	= <<ExprConstant> // <ExprConstant>>	{left}
+	ExprConstant.Mod	= <<ExprConstant> % <ExprConstant>>		{left}
+	ExprConstant.Eq		= <<ExprConstant> == <ExprConstant>>		
+	ExprConstant.NotEq	= <<ExprConstant> != <ExprConstant>>		
+	ExprConstant.GtEq	= [[ExprConstant] >= [ExprConstant]]		
+	ExprConstant.Gt		= [[ExprConstant] > [ExprConstant]]		
+	ExprConstant.LtEq	= [[ExprConstant] <= [ExprConstant]]		
+	ExprConstant.Lt		= [[ExprConstant] < [ExprConstant]]		
+	ExprConstant.Is		= [[ExprConstant] is [ExprConstant]]		
+
 
 
 	MemberExpr.MemberExpr 	= <<ExprConstant>.<ID>>
@@ -90,19 +132,12 @@ context-free syntax
 	Literal.String 		= <<STRING>>
 	//Possible Fix this Literal.IdString	=<<IdString>>
 	
-	Operator.Plus 	= "+"
-	Operator.Minus	= "-"
-	Operator.Mul 	= "*"
-	Operator.Div 	= "//"
-	Operator.Mod	= "%"
-	Operator.Eq		= "=="
-	Operator.Uneq	= "!="
-	Operator.GtEq	= ">="
-	Operator.Gt		= ">"
-	Operator.LtEq	= "<="
-	Operator.Lt		= "<"
-	Operator.Is		= "is"
 	
+	
+context-free priorities
+
+  {ExprConstant.Times} >
+  {ExprConstant.Plus ExprConstant.Minus}
 	
 	
 	

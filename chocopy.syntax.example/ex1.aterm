@@ -1,0 +1,17 @@
+Start(
+  [ For(
+      "a"
+    , Constant(Times(ExprLit(Integer("2")), ExprLit(Integer("3"))))
+    , Block(
+        [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("3")))))]
+      )
+    )
+  , While(
+      Constant(ExprLit(LitTrue()))
+    , Block(
+        [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
+      )
+    )
+  , SimpleStmt(TargetSimpleStmt(Identifier("n"), Constant(ExprLit(Integer("3")))))
+  ]
+)
