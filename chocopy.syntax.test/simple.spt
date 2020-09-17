@@ -5,6 +5,7 @@ start symbol Program
 
 test test simple expressions [[
 [1,23]
+"\"He\nllo\""
 []
 a+3
 a // b

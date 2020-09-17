@@ -40,9 +40,10 @@ context-free sorts
 context-free syntax
 
 	
-	//This is ambigous
+	//This is ambigous when a block has multiple statements
+	// I need to be able to include all statements in the block
 	//Program.StartMixed = <<AllDefinitions*> <Stmt+>>
-	Program.JustDef = <<AllDefinitions+> <Stmt*>>
+	Program.JustDef = <<AllDefinitions+>>
 	Program.JustStatement = <<Stmt*>>
 	
 	AllDefinitions.FunctionDefinition = <<FunctionDef>>
@@ -128,13 +129,13 @@ context-free syntax
 	ExprConstant.Times	= <<ExprConstant> * <ExprConstant>>		{left}
 	ExprConstant.Div	= <<ExprConstant> // <ExprConstant>>	{left}
 	ExprConstant.Mod	= <<ExprConstant> % <ExprConstant>>		{left}
-	ExprConstant.Eq		= <<ExprConstant> == <ExprConstant>>		
-	ExprConstant.NotEq	= <<ExprConstant> != <ExprConstant>>		
-	ExprConstant.GtEq	= [[ExprConstant] >= [ExprConstant]]		
-	ExprConstant.Gt		= [[ExprConstant] > [ExprConstant]]		
-	ExprConstant.LtEq	= [[ExprConstant] <= [ExprConstant]]		
-	ExprConstant.Lt		= [[ExprConstant] < [ExprConstant]]		
-	ExprConstant.Is		= [[ExprConstant] is [ExprConstant]]		
+	ExprConstant.Eq		= <<ExprConstant> == <ExprConstant>>	{non-assoc}	
+	ExprConstant.NotEq	= <<ExprConstant> != <ExprConstant>>	{non-assoc}	
+	ExprConstant.GtEq	= [[ExprConstant] >= [ExprConstant]]	{non-assoc}	
+	ExprConstant.Gt		= [[ExprConstant] > [ExprConstant]]		{non-assoc}	
+	ExprConstant.LtEq	= [[ExprConstant] <= [ExprConstant]]	{non-assoc}	
+	ExprConstant.Lt		= [[ExprConstant] < [ExprConstant]]		{non-assoc}	
+	ExprConstant.Is		= [[ExprConstant] is [ExprConstant]]	{non-assoc}	
 
 
 
@@ -148,14 +149,18 @@ context-free syntax
 	Literal.Integer 	= <<INT>>
 	Literal.String 		= <<STRING>>
 	//Possible Fix this Literal.IdString	=<<IdString>>
+	//TODO
+	//Fix 2 = 3 
 	
 	
 	
 context-free priorities
 
-  {ExprConstant.Times} > {ExprConstant.Plus ExprConstant.Minus},
+  {ExprConstant.Times} > {ExprConstant.Plus ExprConstant.Minus}
+  //,
   
-  Program.JustDef > Program.JustStatement
+  //Program.JustDef > Program.JustStatement
+  //Block.Block > Stmt.SimpleStmt
   
 	
 	
