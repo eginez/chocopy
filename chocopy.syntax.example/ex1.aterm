@@ -1,26 +1,39 @@
-Start(
-  [ FunctionDefinition(
-      FnDef(
-        "fn"
-      , TypedVar("a", TypeID("int"))
-      , TypeID("int")
-      , FnBody(
-          []
-        , [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
-          , SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
-          , SimpleStmt(RetSimpleStmt(Some(Constant(VarId("a")))))
-          ]
+amb(
+  [ JustDef(
+      [ FunctionDefinition(
+          FnDef(
+            "fn"
+          , TypedVarList([TypedVar("a", TypeID("int"))])
+          , TypeID("int")
+          , FnBody(
+              []
+            , Block(
+                [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
+              )
+            )
+          )
         )
-      )
+      ]
+    , [SimpleStmt(RetSimpleStmt(Constant(VarId("a"))))]
     )
-  , ClassDefinition(
-      ClsDef(
-        "One"
-      , "Object"
-      , ClsVars(
-          [VarDef(TypedVar("a", TypeID("int")), Integer("1"))]
+  , JustDef(
+      [ FunctionDefinition(
+          FnDef(
+            "fn"
+          , TypedVarList([TypedVar("a", TypeID("int"))])
+          , TypeID("int")
+          , FnBody(
+              []
+            , Block(
+                [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
+                , SimpleStmt(RetSimpleStmt(Constant(VarId("a"))))
+                ]
+              )
+            )
+          )
         )
-      )
+      ]
+    , []
     )
   ]
 )

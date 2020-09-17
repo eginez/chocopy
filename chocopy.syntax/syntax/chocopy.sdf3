@@ -17,6 +17,7 @@ context-free sorts
   Target
   Declaration
   TypedVar
+  TypedVarList
   Type
   Expr
   ExprConstant
@@ -40,9 +41,9 @@ context-free syntax
 
 	
 	//This is ambigous
-	//Program.Start = <<AllDefinitions*> <Stmt*>>
-	Program.Start = <<AllDefinitions*>>
-	Program.Start2 = <<Stmt*>>
+	//Program.StartMixed = <<AllDefinitions*> <Stmt+>>
+	Program.JustDef = <<AllDefinitions+> <Stmt*>>
+	Program.JustStatement = <<Stmt*>>
 	
 	AllDefinitions.FunctionDefinition = <<FunctionDef>>
 	AllDefinitions.VarDefinition = <<VarDef>>
@@ -50,8 +51,8 @@ context-free syntax
 
 
 	//TODO fix function def to support multiargs
-	FunctionDef.FnDef = "def" ID"(" TypedVar ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
-	FunctionBody.FnBody = <<FunctionDeclarations*><Stmt+>>
+	FunctionDef.FnDef = "def" ID "(" TypedVarList ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
+	FunctionBody.FnBody = fnDecl:FunctionDeclarations* fnStmt:Block {layout(align fnDecl fnStmt)}
 	
 	ClassDef.ClsDef = "class" ID"(" ID ")" ":" clsBody:ClassBody {layout(newline-indent "class" clsBody)}
 	
@@ -71,17 +72,15 @@ context-free syntax
 	ElseBlock.ElseBlock = "else:" blk:Block {layout(newline-indent "else:" blk)}
 	ElifBlock.ElifBlock = "elif" Expr ":" blk:Block {layout(newline-indent "elif" blk)}
 	
-	Stmt.StmtIfElse = ifBlk:IfBlock elseBlk:ElseBlock? {layout(align ifBlk elseBlk)}
-	//TODO
-	//Stmt.StmtIfAll = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
+	Stmt.StmtIfAll = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
 	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
 	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
 	Stmt.SimpleStmt = <<SimpleStmt>>
 	
 
-	SimpleStmt.Pass = <pass>
+	SimpleStmt.Pass = "pass"
 	SimpleStmt.Expression = <<Expr>>
-	SimpleStmt.RetSimpleStmt = <return <Expr?>>
+	SimpleStmt.RetSimpleStmt = <return <Expr>>
 	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
 	//TODO SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
 
@@ -94,6 +93,7 @@ context-free syntax
 	Type.CollectionType = <[<Type>]>
 	
 	TypedVar.TypedVar = <<ID> : <Type>>
+	TypedVarList.TypedVarList = <<{TypedVar ","}*>>
 
 	Declaration.Global 		= <global <ID>>
 	Declaration.NonLocal 	= <nonlocal <ID>>
@@ -153,10 +153,9 @@ context-free syntax
 	
 context-free priorities
 
-  {ExprConstant.Times} > {ExprConstant.Plus ExprConstant.Minus}
+  {ExprConstant.Times} > {ExprConstant.Plus ExprConstant.Minus},
   
-  //Fix this
- // AllDefinitions > Stmt
+  Program.JustDef > Program.JustStatement
   
 	
 	
