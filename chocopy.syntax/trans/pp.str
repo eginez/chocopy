@@ -1,0 +1,49 @@
+module pp
+
+imports
+
+  libstratego-gpp
+  libspoofax/sdf/pp
+  libspoofax/editor/refactoring/-
+  pp/chocopy-parenthesize
+  pp/chocopy-pp
+
+rules
+
+  editor-format:
+    (node, _, ast, path, project-path) -> (filename, result)
+    with
+      ext      := <get-extension> path
+    ; filename := <guarantee-extension(|$[pp.[ext]])> path
+    ; result   := <pp-debug> node
+
+rules
+  
+  pp-chocopy-string =
+    parenthesize-chocopy
+    ; prettyprint-chocopy-start-symbols
+    ; !V([], <id>)
+    ; box2text-string(|120)
+      
+  pp-partial-chocopy-string =
+    parenthesize-chocopy
+    ; prettyprint-chocopy
+    ; !V([], <id>)
+    ; box2text-string(|120)
+    
+  pp-partial-chocopy-string(|sort) =
+    parenthesize-chocopy
+    ; prettyprint-chocopy(|sort)
+    ; !V([], <id>)
+    ; box2text-string(|120)  
+      
+  pp-debug :
+    ast -> result
+    with
+       result := <pp-chocopy-string> ast
+    <+ <bottomup(try(not(is-string); not(is-list); not(pp-chocopy-string); debug(!"cannot pp ")))> ast
+    ;  result := ""
+
+rules
+  
+  construct-textual-change = construct-textual-change(pp-partial-chocopy-string, parenthesize, override-reconstruction, resugar)

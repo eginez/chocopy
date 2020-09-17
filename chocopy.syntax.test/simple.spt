@@ -1,0 +1,110 @@
+module simple
+language chocopy
+
+start symbol Program
+
+test test simple expressions [[
+[1,23]
+[]
+a+3
+a // b
+a == b
+a[3] = b[3]
+b >= c
+ab
+
+]] parse succeeds
+
+test parse comments [[
+#comment
+##more comments
+a = b #other coments
+]] parse succeeds
+
+test keywords [[
+if = a
+]] parse fails
+
+test assoc [[
+1 * 2 + 1
+]] parse succeeds
+
+test badif [[
+	if a==3: n
+]] parse fails
+
+test badif2 [[
+if a==3: 
+n
+
+if a==3:
+	n
+	else:
+		n
+
+]] parse fails
+
+test if1 [[
+if a==3: 
+	n
+else:
+	n =3
+]] parse succeeds
+
+
+test elif [[
+if a==3:
+	n =4
+elif:
+	n =5
+else:
+	n = 6	
+]] parse succeeds
+
+test nestedif [[
+if a==3:
+	n
+	a = 2
+	if n == 3:
+		a = [3,4]
+	else:
+		n = 3
+else:
+	n
+]] parse succeeds
+
+test simple for [[
+for a in 2*3:
+	a =3
+	a = 4
+]]
+
+test bad for [[
+for a in [a,b]
+a=3
+]] parse fails
+
+
+test while [[
+while True:
+	a[1] = 1
+	b = 2
+]]
+
+test bad while [[
+while True:
+]] parse fails
+
+test simple fn decl [[
+def fn(a:int) -> int:
+	a = 1
+	a = 2
+	return a
+]]
+
+
+test class def [[
+class One(Object):
+	a:int = 1
+	
+]] 
