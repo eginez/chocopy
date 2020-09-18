@@ -1,1 +1,39 @@
-JustStatement([SimpleStmt(Expression(Constant(ExprLit(String("\"\\\"hell\\no\\\"\"")))))])
+amb(
+  [ Program(
+      [ FunctionDefinition(
+          FnDef(
+            "f"
+          , TypedVarList([])
+          , TypeID("int")
+          , FnBody(
+              []
+            , Block(
+                [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
+              )
+            )
+          )
+        )
+      ]
+    , [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))]
+    )
+  , Program(
+      [ FunctionDefinition(
+          FnDef(
+            "f"
+          , TypedVarList([])
+          , TypeID("int")
+          , FnBody(
+              []
+            , Block(
+                [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
+                , SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
+                ]
+              )
+            )
+          )
+        )
+      ]
+    , []
+    )
+  ]
+)

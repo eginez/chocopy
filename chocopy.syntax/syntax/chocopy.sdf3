@@ -42,9 +42,7 @@ context-free syntax
 	
 	//This is ambigous when a block has multiple statements
 	// I need to be able to include all statements in the block
-	//Program.StartMixed = <<AllDefinitions*> <Stmt+>>
-	Program.JustDef = <<AllDefinitions+>>
-	Program.JustStatement = <<Stmt*>>
+	Program.Program = <<AllDefinitions*> <Stmt*>>
 	
 	AllDefinitions.FunctionDefinition = <<FunctionDef>>
 	AllDefinitions.VarDefinition = <<VarDef>>
@@ -73,7 +71,7 @@ context-free syntax
 	ElseBlock.ElseBlock = "else:" blk:Block {layout(newline-indent "else:" blk)}
 	ElifBlock.ElifBlock = "elif" Expr ":" blk:Block {layout(newline-indent "elif" blk)}
 	
-	Stmt.StmtIfAll = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
+	Stmt.StmtIf = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
 	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
 	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
 	Stmt.SimpleStmt = <<SimpleStmt>>
@@ -99,7 +97,6 @@ context-free syntax
 	Declaration.Global 		= <global <ID>>
 	Declaration.NonLocal 	= <nonlocal <ID>>
 
-	VarDef.VarDef = <<TypedVar> = <Literal>>
 	
 	FunctionDeclarations.FnLocalGlobals = <<Declaration>>
 	FunctionDeclarations.FnVarDef = <<VarDef>> 
@@ -111,17 +108,20 @@ context-free syntax
 	
 
 	
+	VarDef.VarDef 	= <<TypedVar> = <Literal>>
+	Expr 			= <(<Expr>)>							{bracket}
 	Expr.NotExpr	= <not <Expr>>
 	Expr.And		= <<Expr> and <Expr>>					{left}
 	Expr.Or			= <<Expr> or <Expr>>					{left}
 	Expr.IfElse		= <<Expr> if <Expr> else <Expr>>		{right}
 	Expr.Constant	= <<ExprConstant>>
+
 	
 	ExprConstant.VarId		= <<ID>>
 	ExprConstant.ExprLit 	= <<Literal>>
 	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
-	ExprConstant.ParenLit 	= <(<Expr>)>
-	ExprConstant.Index		= <<ExprConstant>[<ExprConstant>]>
+	ExprConstant.ParenLit 	= <(<Expr>)>						
+	ExprConstant.Index		= IndexExpr
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
 	ExprConstant.Plus	= <<ExprConstant> + <ExprConstant>>		{left}
@@ -141,7 +141,8 @@ context-free syntax
 
 	MemberExpr.MemberExpr 	= <<ExprConstant>.<ID>>
 	
-	IndexExpr.IndexExpr		= <<ExprConstant>[<ExprConstant>]>
+	IndexExpr.IdIndex		= <<ID>[<ExprConstant>]>
+	IndexExpr.StringIndex		= <<STRING>[<ExprConstant>]>
 	
 	Literal.None 		= "None"
 	Literal.LitTrue 	= "True"
@@ -149,21 +150,17 @@ context-free syntax
 	Literal.Integer 	= <<INT>>
 	Literal.String 		= <<STRING>>
 	//Possible Fix this Literal.IdString	=<<IdString>>
-	//TODO
-	//Fix 2 = 3 
 	
 	
 	
 context-free priorities
 
-  {ExprConstant.Times} > {ExprConstant.Plus ExprConstant.Minus}
+  {ExprConstant.Div} > {ExprConstant.Times} > ExprConstant.Plus > ExprConstant.Minus
   //,
-  
-  //Program.JustDef > Program.JustStatement
+  //Program.JustDef > Program.Mixed
   //Block.Block > Stmt.SimpleStmt
   
 	
 	
 	
-
 

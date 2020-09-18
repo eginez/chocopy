@@ -16,6 +16,10 @@ ab
 
 ]] parse succeeds
 
+test parse math expression [[
+ 2 // 3 + 4*3
+]] parse succeeds
+
 test parse comments [[
 #comment
 ##more comments
