@@ -13,6 +13,7 @@ pardonedLanguages:
 - SDF
 language:
   sdf:
+    jsglr-version: v2
     pretty-print: chocopy
     sdf2table: java
     placeholder:

@@ -42,7 +42,7 @@ context-free syntax
 	
 	//This is ambigous when a block has multiple statements
 	// I need to be able to include all statements in the block
-	Program.Program = <<AllDefinitions*> <Stmt+>>
+	Program.Program = <<AllDefinitions*> <Block>>
 	Program.ProgramOne = <<AllDefinitions*>>  {prefer}
 	
 	AllDefinitions.FunctionDefinition = <<FunctionDef>>
@@ -65,7 +65,8 @@ context-free syntax
 	
 
 	//block = NEWLINE INDENT stmt+ DEDENT
-	Block.Block = sts:Stmt+ {layout(align-list sts)}
+	//longest match
+	Block.Block = sts:Stmt+ {longest-match,layout(align-list sts)}
 
 	
 	IfBlock.IfBlock = "if" Expr":" blk:Block {layout(newline-indent "if" blk)}
@@ -78,9 +79,9 @@ context-free syntax
 	Stmt.SimpleStmt = <<SimpleStmt>>
 	
 
-	SimpleStmt.Pass = "pass"
+	//SimpleStmt.Pass = "pass"
 	SimpleStmt.Expression = <<Expr>>
-	SimpleStmt.RetSimpleStmt = <return <Expr>>
+	//SimpleStmt.RetSimpleStmt = <return <Expr>>
 	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
 	//TODO SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
 
@@ -121,7 +122,6 @@ context-free syntax
 	ExprConstant.VarId		= <<ID>>
 	ExprConstant.ExprLit 	= <<Literal>>
 	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
-	ExprConstant.ParenLit 	= <(<Expr>)>						
 	ExprConstant.Index		= IndexExpr
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
