@@ -61,11 +61,7 @@ context-free syntax
 	ClassBody.ClsFn = <<FunctionDef+>>
 	
 	
-	
-	
 
-	//block = NEWLINE INDENT stmt+ DEDENT
-	//longest match
 	Block.Block = sts:Stmt+ {longest-match,layout(align-list sts)}
 
 	
@@ -73,7 +69,7 @@ context-free syntax
 	ElseBlock.ElseBlock = "else:" blk:Block {layout(newline-indent "else:" blk)}
 	ElifBlock.ElifBlock = "elif" Expr ":" blk:Block {layout(newline-indent "elif" blk)}
 	
-	Stmt.StmtIf = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
+	Stmt.StmtIf = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align ifBlk elseBlk )}
 	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
 	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
 	Stmt.SimpleStmt = <<SimpleStmt>>
@@ -105,10 +101,6 @@ context-free syntax
 	FunctionDeclarations.FnFnDef = <<FunctionDef>>
 	
 	
-	
-
-	
-
 	
 	VarDef.VarDef 	= <<TypedVar> = <Literal>>
 	Expr 			= <(<Expr>)>							{bracket}

@@ -38,12 +38,12 @@ test badif [[
 	if a==3: n
 ]] parse fails
 
-//test badif2 [[
-//if a==3:
-//	n
-//	else:
-//		n
-//]] parse fails
+test badif2 [[
+if a==3:
+	n
+	else:
+		n
+]] parse fails
 
 test if1 [[
 if a==3: 
