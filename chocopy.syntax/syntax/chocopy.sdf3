@@ -121,7 +121,6 @@ context-free syntax
 	ExprConstant.VarId		= <<ID>>
 	ExprConstant.ExprLit 	= <<Literal>>
 	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
-	ExprConstant.ParenLit 	= <(<Expr>)>						
 	ExprConstant.Index		= IndexExpr
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
