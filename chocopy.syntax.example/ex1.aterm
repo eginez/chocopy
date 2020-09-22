@@ -4,9 +4,9 @@ Program(
     [ SimpleStmt(
         Expression(
           Constant(
-            Gt(
-              Index(IdIndex("a", ExprLit(Integer("1"))))
-            , Index(IdIndex("a", ExprLit(Integer("3"))))
+            FuncCall(
+              "fn"
+            , [Constant(Times(ExprLit(Integer("2")), ExprLit(Integer("3"))))]
             )
           )
         )

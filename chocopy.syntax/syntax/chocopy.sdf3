@@ -104,7 +104,7 @@ context-free syntax
 	
 	VarDef.VarDef 	= <<TypedVar> = <Literal>>
 	Expr 			= <(<Expr>)>							{bracket}
-	Expr.NotExpr	= <not <Expr>>
+	Expr.Not		= <not <Expr>>
 	Expr.And		= <<Expr> and <Expr>>					{left}
 	Expr.Or			= <<Expr> or <Expr>>					{left}
 	Expr.IfElse		= <<Expr> if <Expr> else <Expr>>		{right}
@@ -156,11 +156,25 @@ context-free priorities
   } 
   > 
   {
+  left:
   	ExprConstant.Eq 
-  	ExprConstant.NotEq ExprConstant.GtEq ExprConstant.Gt 
-  	ExprConstant.Lt ExprConstant.LtEq 
+  	ExprConstant.NotEq 
+  	ExprConstant.GtEq 
+  	ExprConstant.Gt 
+  	ExprConstant.Lt 
+  	ExprConstant.LtEq 
   	ExprConstant.Is
   }
+  
+  >
+  
+  {Expr.Not}
+   > 
+   {
+   left:
+   	Expr.And
+   	Expr.Or
+   }
   
   //,
   //Program.JustDef > Program.Mixed
