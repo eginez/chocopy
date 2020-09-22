@@ -1,14 +1,14 @@
 Program(
   []
 , Block(
-    [ StmtIf(
-        IfBlock(
-          Constant(Eq(VarId("a"), ExprLit(Integer("3"))))
-        , Block([SimpleStmt(Expression(Constant(VarId("n"))))])
-        )
-      , []
-      , Some(
-          ElseBlock(Block([SimpleStmt(Expression(Constant(VarId("n"))))]))
+    [ SimpleStmt(
+        Expression(
+          Constant(
+            Gt(
+              Index(IdIndex("a", ExprLit(Integer("1"))))
+            , Index(IdIndex("a", ExprLit(Integer("3"))))
+            )
+          )
         )
       )
     ]

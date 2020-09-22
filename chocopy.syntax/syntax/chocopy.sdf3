@@ -56,16 +56,12 @@ context-free syntax
 	
 	ClassDef.ClsDef = "class" ID"(" ID ")" ":" clsBody:ClassBody {layout(newline-indent "class" clsBody)}
 	
-	ClassBody.ClsEmpty = "pass"
-	ClassBody.ClsVars = <<VarDef+>>
-	ClassBody.ClsFn = <<FunctionDef+>>
-	
-	
+	ClassBody.ClsBodyEmpty = "pass"
+	ClassBody.ClsBody = VarDef* FunctionDef+
+	ClassBody.ClsBodyVars = defs:VarDef+ {longest-match,prefer, layout(align-list defs)}
 	
 	
 
-	//block = NEWLINE INDENT stmt+ DEDENT
-	//longest match
 	Block.Block = sts:Stmt+ {longest-match,layout(align-list sts)}
 
 	
@@ -73,7 +69,7 @@ context-free syntax
 	ElseBlock.ElseBlock = "else:" blk:Block {layout(newline-indent "else:" blk)}
 	ElifBlock.ElifBlock = "elif" Expr ":" blk:Block {layout(newline-indent "elif" blk)}
 	
-	Stmt.StmtIf = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
+	Stmt.StmtIf = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align ifBlk elseBlk )}
 	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
 	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
 	Stmt.SimpleStmt = <<SimpleStmt>>
@@ -106,10 +102,6 @@ context-free syntax
 	
 	
 	
-
-	
-
-	
 	VarDef.VarDef 	= <<TypedVar> = <Literal>>
 	Expr 			= <(<Expr>)>							{bracket}
 	Expr.NotExpr	= <not <Expr>>
@@ -122,6 +114,7 @@ context-free syntax
 	ExprConstant.VarId		= <<ID>>
 	ExprConstant.ExprLit 	= <<Literal>>
 	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
+	ExprConstant.ParenLit 	=  <(<ExprConstant>)>
 	ExprConstant.Index		= IndexExpr
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
@@ -156,10 +149,24 @@ context-free syntax
 	
 context-free priorities
 
-  {ExprConstant.Div} > {ExprConstant.Times} > ExprConstant.Plus > ExprConstant.Minus
+  {ExprConstant.Div} > {ExprConstant.Times} > ExprConstant.Plus > ExprConstant.Minus >
+  {
+  	ExprConstant.FuncCall
+  	ExprConstant.MemberCall
+  } 
+  > 
+  {
+  	ExprConstant.Eq 
+  	ExprConstant.NotEq ExprConstant.GtEq ExprConstant.Gt 
+  	ExprConstant.Lt ExprConstant.LtEq 
+  	ExprConstant.Is
+  }
+  
   //,
   //Program.JustDef > Program.Mixed
   //Block.Block > Stmt.SimpleStmt
+  //Priorities
+  //Literals
   
 	
 	
