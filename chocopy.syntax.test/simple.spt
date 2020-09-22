@@ -16,6 +16,26 @@ ab
 
 ]] parse succeeds
 
+test math paren [[
+(2 + 3) * 4
+]]
+
+test priorites [[
+a > 2 * 3
+a * 2 != b * 3
+a[1] > a[3]
+fn1() <= fn2()
+]] parse succeeds
+
+test member calls [[
+a[3].fn(2)
+]]
+
+//test fnreturarray [[
+//a.fn(2)[3]
+//a.f1() > b.f2()
+//]]
+
 test parse math expression [[
  2 // 3 + 4*3
 ]] parse succeeds

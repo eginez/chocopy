@@ -114,6 +114,7 @@ context-free syntax
 	ExprConstant.VarId		= <<ID>>
 	ExprConstant.ExprLit 	= <<Literal>>
 	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
+	ExprConstant.ParenLit 	=  <(<ExprConstant>)>
 	ExprConstant.Index		= IndexExpr
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
@@ -148,10 +149,24 @@ context-free syntax
 	
 context-free priorities
 
-  {ExprConstant.Div} > {ExprConstant.Times} > ExprConstant.Plus > ExprConstant.Minus
+  {ExprConstant.Div} > {ExprConstant.Times} > ExprConstant.Plus > ExprConstant.Minus >
+  {
+  	ExprConstant.FuncCall
+  	ExprConstant.MemberCall
+  } 
+  > 
+  {
+  	ExprConstant.Eq 
+  	ExprConstant.NotEq ExprConstant.GtEq ExprConstant.Gt 
+  	ExprConstant.Lt ExprConstant.LtEq 
+  	ExprConstant.Is
+  }
+  
   //,
   //Program.JustDef > Program.Mixed
   //Block.Block > Stmt.SimpleStmt
+  //Priorities
+  //Literals
   
 	
 	

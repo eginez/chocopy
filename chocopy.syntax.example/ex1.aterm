@@ -1,6 +1,16 @@
 Program(
   []
 , Block(
-    [SimpleStmt(Expression(Constant(Index(IdIndex("a", VarId("b"))))))]
+    [ SimpleStmt(
+        Expression(
+          Constant(
+            Gt(
+              Index(IdIndex("a", ExprLit(Integer("1"))))
+            , Index(IdIndex("a", ExprLit(Integer("3"))))
+            )
+          )
+        )
+      )
+    ]
   )
 )
