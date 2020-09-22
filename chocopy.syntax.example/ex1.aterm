@@ -1,39 +1,63 @@
 amb(
-  [ Program(
-      [ FunctionDefinition(
-          FnDef(
-            "f"
-          , TypedVarList([])
-          , TypeID("int")
-          , FnBody(
-              []
-            , Block(
-                [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
+  [ amb(
+      [ Program(
+          [ FunctionDefinition(
+              FnDef(
+                "fn"
+              , TypedVarList([TypedVar("a", TypeID("int"))])
+              , TypeID("int")
+              , FnBody(
+                  []
+                , Block(
+                    [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
+                  )
+                )
               )
             )
-          )
+          ]
+        , [ SimpleStmt(Expression(Constant(Plus(VarId("a"), VarId("b")))))
+          , SimpleStmt(RetSimpleStmt(Constant(VarId("a"))))
+          ]
+        )
+      , Program(
+          [ FunctionDefinition(
+              FnDef(
+                "fn"
+              , TypedVarList([TypedVar("a", TypeID("int"))])
+              , TypeID("int")
+              , FnBody(
+                  []
+                , Block(
+                    [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
+                    , SimpleStmt(Expression(Constant(Plus(VarId("a"), VarId("b")))))
+                    ]
+                  )
+                )
+              )
+            )
+          ]
+        , [SimpleStmt(RetSimpleStmt(Constant(VarId("a"))))]
         )
       ]
-    , [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))]
     )
-  , Program(
+  , ProgramOne(
       [ FunctionDefinition(
           FnDef(
-            "f"
-          , TypedVarList([])
+            "fn"
+          , TypedVarList([TypedVar("a", TypeID("int"))])
           , TypeID("int")
           , FnBody(
               []
             , Block(
                 [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
-                , SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
+                , SimpleStmt(Expression(Constant(Plus(VarId("a"), VarId("b")))))
+                , SimpleStmt(RetSimpleStmt(Constant(VarId("a"))))
                 ]
               )
             )
           )
         )
       ]
-    , []
     )
   ]
 )

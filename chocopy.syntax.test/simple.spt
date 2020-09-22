@@ -110,10 +110,11 @@ test bad while [[
 while True:
 ]] parse fails
 
-test simple fn decl [[
+test multiple fn decl [[
 def fn(a:int) -> int:
 	a = 1
-	a = 2
+	b = 1
+	a = a + b
 	return a
 def fn(a: int, b:int) -> int:
 	a = 1
@@ -150,4 +151,15 @@ class A(Object):
 	def one() -> int:
 		return 1
 a = 1
+]] parse succeeds
+
+test multifn [[
+def f() -> int:
+	a = 1
+	a = 2
+	a = 3
+	def f() -> int:
+		n = 5
+		n = 3
+a = 4
 ]] parse succeeds
