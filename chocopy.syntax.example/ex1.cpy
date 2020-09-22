@@ -1,4 +1,4 @@
-def fn(a:int) -> int:
-	a = 1
+def n() -> int:
+	a =1
 	a + b
-	return a
+	a + b
