@@ -1,12 +1,14 @@
 Program(
   []
 , Block(
-    [ While(
-        Constant(ExprLit(LitTrue()))
-      , Block(
-          [SimpleStmt(
-             Expression(Constant(Plus(VarId("a"), ExprLit(Integer("1")))))
-           )]
+    [ StmtIf(
+        IfBlock(
+          Constant(Eq(VarId("a"), ExprLit(Integer("3"))))
+        , Block([SimpleStmt(Expression(Constant(VarId("n"))))])
+        )
+      , []
+      , Some(
+          ElseBlock(Block([SimpleStmt(Expression(Constant(VarId("n"))))]))
         )
       )
     ]
