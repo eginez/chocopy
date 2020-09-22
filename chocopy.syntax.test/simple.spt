@@ -140,6 +140,16 @@ def fn(a: int) -> int:
 ]]
 
 
+test classfnonly [[
+class A(Object):
+	def fn() -> int:
+		b: int = 1
+		f = 1
+		f = 2
+a = 1
+b = 1
+]] parse succeeds
+
 test classfnstat [[
 def fn() -> int:
 	return 1
@@ -148,6 +158,17 @@ class A(Object):
 		return 1
 a = 1
 ]] parse succeeds
+
+test classvarfn [[
+class A(Object):
+	a: int = 1
+	def fn() -> int:
+		b: int = 1
+		f = 1
+		f = 2
+a = 1
+b = 1
+]]parse succeeds
 
 test multifn [[
 def f() -> int:

@@ -56,9 +56,9 @@ context-free syntax
 	
 	ClassDef.ClsDef = "class" ID"(" ID ")" ":" clsBody:ClassBody {layout(newline-indent "class" clsBody)}
 	
-	ClassBody.ClsEmpty = "pass"
-	ClassBody.ClsVars = <<VarDef+>>
-	ClassBody.ClsFn = <<FunctionDef+>>
+	ClassBody.ClsBodyEmpty = "pass"
+	ClassBody.ClsBody = VarDef* FunctionDef+
+	ClassBody.ClsBodyVars = defs:VarDef+ {longest-match,prefer, layout(align-list defs)}
 	
 	
 
