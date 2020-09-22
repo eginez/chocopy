@@ -17,6 +17,7 @@ context-free sorts
   Target
   Declaration
   TypedVar
+  TypedVarList
   Type
   Expr
   ExprConstant
@@ -39,10 +40,10 @@ context-free sorts
 context-free syntax
 
 	
-	//This is ambigous
-	//Program.Start = <<AllDefinitions*> <Stmt*>>
-	Program.Start = <<AllDefinitions*>>
-	Program.Start2 = <<Stmt*>>
+	//This is ambigous when a block has multiple statements
+	// I need to be able to include all statements in the block
+	Program.Program = <<AllDefinitions*> <Stmt+>>
+	Program.ProgramOne = <<AllDefinitions*>>  {prefer}
 	
 	AllDefinitions.FunctionDefinition = <<FunctionDef>>
 	AllDefinitions.VarDefinition = <<VarDef>>
@@ -50,8 +51,8 @@ context-free syntax
 
 
 	//TODO fix function def to support multiargs
-	FunctionDef.FnDef = "def" ID"(" TypedVar ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
-	FunctionBody.FnBody = <<FunctionDeclarations*><Stmt+>>
+	FunctionDef.FnDef = "def" ID "(" TypedVarList ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
+	FunctionBody.FnBody = fnDecl:FunctionDeclarations* fnStmt:Block {layout(align fnDecl fnStmt)}
 	
 	ClassDef.ClsDef = "class" ID"(" ID ")" ":" clsBody:ClassBody {layout(newline-indent "class" clsBody)}
 	
@@ -71,17 +72,15 @@ context-free syntax
 	ElseBlock.ElseBlock = "else:" blk:Block {layout(newline-indent "else:" blk)}
 	ElifBlock.ElifBlock = "elif" Expr ":" blk:Block {layout(newline-indent "elif" blk)}
 	
-	Stmt.StmtIfElse = ifBlk:IfBlock elseBlk:ElseBlock? {layout(align ifBlk elseBlk)}
-	//TODO
-	//Stmt.StmtIfAll = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
+	Stmt.StmtIf = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
 	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
 	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
 	Stmt.SimpleStmt = <<SimpleStmt>>
 	
 
-	SimpleStmt.Pass = <pass>
+	SimpleStmt.Pass = "pass"
 	SimpleStmt.Expression = <<Expr>>
-	SimpleStmt.RetSimpleStmt = <return <Expr?>>
+	SimpleStmt.RetSimpleStmt = <return <Expr>>
 	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
 	//TODO SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
 
@@ -94,11 +93,11 @@ context-free syntax
 	Type.CollectionType = <[<Type>]>
 	
 	TypedVar.TypedVar = <<ID> : <Type>>
+	TypedVarList.TypedVarList = <<{TypedVar ","}*>>
 
 	Declaration.Global 		= <global <ID>>
 	Declaration.NonLocal 	= <nonlocal <ID>>
 
-	VarDef.VarDef = <<TypedVar> = <Literal>>
 	
 	FunctionDeclarations.FnLocalGlobals = <<Declaration>>
 	FunctionDeclarations.FnVarDef = <<VarDef>> 
@@ -110,17 +109,20 @@ context-free syntax
 	
 
 	
+	VarDef.VarDef 	= <<TypedVar> = <Literal>>
+	Expr 			= <(<Expr>)>							{bracket}
 	Expr.NotExpr	= <not <Expr>>
 	Expr.And		= <<Expr> and <Expr>>					{left}
 	Expr.Or			= <<Expr> or <Expr>>					{left}
 	Expr.IfElse		= <<Expr> if <Expr> else <Expr>>		{right}
 	Expr.Constant	= <<ExprConstant>>
+
 	
 	ExprConstant.VarId		= <<ID>>
 	ExprConstant.ExprLit 	= <<Literal>>
 	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
-	ExprConstant.ParenLit 	= <(<Expr>)>
-	ExprConstant.Index		= <<ExprConstant>[<ExprConstant>]>
+	ExprConstant.ParenLit 	= <(<Expr>)>						
+	ExprConstant.Index		= IndexExpr
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
 	ExprConstant.Plus	= <<ExprConstant> + <ExprConstant>>		{left}
@@ -128,19 +130,20 @@ context-free syntax
 	ExprConstant.Times	= <<ExprConstant> * <ExprConstant>>		{left}
 	ExprConstant.Div	= <<ExprConstant> // <ExprConstant>>	{left}
 	ExprConstant.Mod	= <<ExprConstant> % <ExprConstant>>		{left}
-	ExprConstant.Eq		= <<ExprConstant> == <ExprConstant>>		
-	ExprConstant.NotEq	= <<ExprConstant> != <ExprConstant>>		
-	ExprConstant.GtEq	= [[ExprConstant] >= [ExprConstant]]		
-	ExprConstant.Gt		= [[ExprConstant] > [ExprConstant]]		
-	ExprConstant.LtEq	= [[ExprConstant] <= [ExprConstant]]		
-	ExprConstant.Lt		= [[ExprConstant] < [ExprConstant]]		
-	ExprConstant.Is		= [[ExprConstant] is [ExprConstant]]		
+	ExprConstant.Eq		= <<ExprConstant> == <ExprConstant>>	{non-assoc}	
+	ExprConstant.NotEq	= <<ExprConstant> != <ExprConstant>>	{non-assoc}	
+	ExprConstant.GtEq	= [[ExprConstant] >= [ExprConstant]]	{non-assoc}	
+	ExprConstant.Gt		= [[ExprConstant] > [ExprConstant]]		{non-assoc}	
+	ExprConstant.LtEq	= [[ExprConstant] <= [ExprConstant]]	{non-assoc}	
+	ExprConstant.Lt		= [[ExprConstant] < [ExprConstant]]		{non-assoc}	
+	ExprConstant.Is		= [[ExprConstant] is [ExprConstant]]	{non-assoc}	
 
 
 
 	MemberExpr.MemberExpr 	= <<ExprConstant>.<ID>>
 	
-	IndexExpr.IndexExpr		= <<ExprConstant>[<ExprConstant>]>
+	IndexExpr.IdIndex		= <<ID>[<ExprConstant>]>
+	IndexExpr.StringIndex		= <<STRING>[<ExprConstant>]>
 	
 	Literal.None 		= "None"
 	Literal.LitTrue 	= "True"
@@ -153,13 +156,12 @@ context-free syntax
 	
 context-free priorities
 
-  {ExprConstant.Times} > {ExprConstant.Plus ExprConstant.Minus}
+  {ExprConstant.Div} > {ExprConstant.Times} > ExprConstant.Plus > ExprConstant.Minus
+  //,
+  //Program.JustDef > Program.Mixed
+  //Block.Block > Stmt.SimpleStmt
   
-  //Fix this
- // AllDefinitions > Stmt
-  
 	
 	
 	
-
 

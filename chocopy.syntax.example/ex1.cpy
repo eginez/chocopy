@@ -1,8 +1,4 @@
 def fn(a:int) -> int:
 	a = 1
-	a = 2
+	a + b
 	return a
-
-class One(Object):
-	a:int = 1
-	

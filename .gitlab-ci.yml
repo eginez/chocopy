@@ -17,6 +17,8 @@ build:
 
 grade:
   image: gitlab.ewi.tudelft.nl:4242/cs4200/admin/docker-grader:latest
+  tags:
+    - builder1
   stage: grade
   only:
     - /^milestone-.*-submission$/
