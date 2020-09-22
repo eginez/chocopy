@@ -42,7 +42,7 @@ context-free syntax
 	
 	//This is ambigous when a block has multiple statements
 	// I need to be able to include all statements in the block
-	Program.Program = <<AllDefinitions*> <Stmt+>>
+	Program.Program = <<AllDefinitions*> <Block>>
 	Program.ProgramOne = <<AllDefinitions*>>  {prefer}
 	
 	AllDefinitions.FunctionDefinition = <<FunctionDef>>
