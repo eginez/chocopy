@@ -79,9 +79,9 @@ context-free syntax
 	Stmt.SimpleStmt = <<SimpleStmt>>
 	
 
-	//SimpleStmt.Pass = "pass"
+	SimpleStmt.Pass = "pass"
 	SimpleStmt.Expression = <<Expr>>
-	//SimpleStmt.RetSimpleStmt = <return <Expr>>
+	SimpleStmt.RetSimpleStmt = <return <Expr>>
 	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
 	//TODO SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
 

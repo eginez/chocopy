@@ -1,19 +1,14 @@
-ProgramOne(
-  [ FunctionDefinition(
-      FnDef(
-        "n"
-      , TypedVarList([])
-      , TypeID("int")
-      , FnBody(
-          []
-        , Block(
-            [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
-            , SimpleStmt(Expression(Constant(Plus(VarId("a"), VarId("b")))))
-            , SimpleStmt(Expression(Constant(Plus(VarId("a"), VarId("b")))))
-            ]
-          )
+Program(
+  []
+, Block(
+    [ While(
+        Constant(ExprLit(LitTrue()))
+      , Block(
+          [SimpleStmt(
+             Expression(Constant(Plus(VarId("a"), ExprLit(Integer("1")))))
+           )]
         )
       )
-    )
-  ]
+    ]
+  )
 )
