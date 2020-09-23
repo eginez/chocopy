@@ -72,11 +72,11 @@ context-free syntax
 	Stmt.StmtIf = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align ifBlk elseBlk )}
 	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
 	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
-	Stmt.SimpleStmt = <<SimpleStmt>>
+	Stmt.SimpleStmt = <<SimpleStmt>> {layout(1.first.line == 1.last.line)}
 	
 
 	SimpleStmt.Pass = "pass"
-	SimpleStmt.Expression = <<Expr>>
+	SimpleStmt.Expression = <<Expr>> 
 	SimpleStmt.RetSimpleStmt = <return <Expr>>
 	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
 	//TODO SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
@@ -148,11 +148,20 @@ context-free syntax
 	
 	
 context-free priorities
-
-  {ExprConstant.Div} > {ExprConstant.Times} > ExprConstant.Plus > ExprConstant.Minus >
-  {
+ {
   	ExprConstant.FuncCall
   	ExprConstant.MemberCall
+  }
+  >
+  { left:
+  	ExprConstant.Div 
+  	ExprConstant.Times
+  }
+  >
+  { 
+  left:
+  	ExprConstant.Plus
+  	ExprConstant.Minus
   } 
   > 
   {
@@ -165,10 +174,8 @@ context-free priorities
   	ExprConstant.LtEq 
   	ExprConstant.Is
   }
-  
   >
-  
-  {Expr.Not}
+  Expr.Not
    > 
    {
    left:

@@ -16,6 +16,16 @@ ab
 
 ]] parse succeeds
 
+test not same line exp [[
+1 * 
+1
+]] parse fails
+
+test not same line exp2 [[
+a
+.b()
+]] parse fails
+
 test math paren [[
 (2 + 3) * 4
 ]]

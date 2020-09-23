@@ -1,16 +1,8 @@
 Program(
   []
 , Block(
-    [ SimpleStmt(
-        Expression(
-          Constant(
-            FuncCall(
-              "fn"
-            , [Constant(Times(ExprLit(Integer("2")), ExprLit(Integer("3"))))]
-            )
-          )
-        )
-      )
-    ]
+    [SimpleStmt(
+       Expression(Constant(MemberCall(MemberExpr(VarId("c"), "func"), [])))
+     )]
   )
 )
