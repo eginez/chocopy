@@ -2,7 +2,7 @@ Program(
   []
 , Block(
     [SimpleStmt(
-       Expression(Constant(MemberCall(MemberExpr(VarId("c"), "func"), [])))
+       Expression(Constant(Index(IdIndex("a", ExprLit(Integer("1"))))))
      )]
   )
 )

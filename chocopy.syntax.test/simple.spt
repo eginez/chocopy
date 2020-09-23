@@ -33,7 +33,7 @@ test math paren [[
 test priorites [[
 a > 2 * 3
 a * 2 != b * 3
-a[1] > a[3]
+//a[1] > a[3]
 fn1() <= fn2()
 a == 2 > 3 and 2 + 4 <= 5
 ]] parse succeeds
