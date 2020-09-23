@@ -148,24 +148,23 @@ context-free syntax
 	
 	
 context-free priorities
- {
-  	ExprConstant.FuncCall
-  	ExprConstant.MemberCall
-  }
-  >
-  { left:
-  	ExprConstant.Div 
-  	ExprConstant.Times
-  }
-  >
-  { 
-  left:
-  	ExprConstant.Plus
-  	ExprConstant.Minus
-  } 
-  > 
-  {
-  left:
+{
+	Expr.IfElse
+}
+>
+{
+	left: Expr.Or
+}
+>
+{
+	left: Expr.And		
+}
+>
+{
+	left: Expr.Not		
+}
+>
+{
   	ExprConstant.Eq 
   	ExprConstant.NotEq 
   	ExprConstant.GtEq 
@@ -173,15 +172,26 @@ context-free priorities
   	ExprConstant.Lt 
   	ExprConstant.LtEq 
   	ExprConstant.Is
-  }
-  >
-  Expr.Not
-   > 
-   {
-   left:
-   	Expr.And
-   	Expr.Or
-   }
+}
+>
+{
+	left:
+  	ExprConstant.Plus
+  	ExprConstant.Minus
+}
+>
+{
+	left:
+  	ExprConstant.Div 
+  	ExprConstant.Times
+  	ExprConstant.Mod
+}
+>
+{
+	left:
+  	ExprConstant.Index
+  	ExprConstant.MemberCall
+}
   
   //,
   //Program.JustDef > Program.Mixed
