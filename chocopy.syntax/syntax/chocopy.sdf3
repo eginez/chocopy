@@ -113,9 +113,10 @@ context-free syntax
 	
 	ExprConstant.VarId		= <<ID>>
 	ExprConstant.ExprLit 	= <<Literal>>
-	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
-	ExprConstant.ParenLit 	=  <(<ExprConstant>)>
+	ExprConstant.ListLit 	= <[<{Expr ", "}*>]>
+	ExprConstant.ParenLit 	= <(<ExprConstant>)>
 	ExprConstant.Index		= IndexExpr
+	ExprConstant.Member		= MemberExpr
 	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
 	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
 	ExprConstant.Plus	= <<ExprConstant> + <ExprConstant>>		{left}
@@ -134,9 +135,7 @@ context-free syntax
 
 
 	MemberExpr.MemberExpr 	= <<ExprConstant>.<ID>>
-	
-	IndexExpr.IdIndex		= <<ID>[<ExprConstant>]>
-	IndexExpr.StringIndex		= <<STRING>[<ExprConstant>]>
+	IndexExpr.IndexExpr		= <<ExprConstant>[<Expr>]>
 	
 	Literal.None 		= "None"
 	Literal.LitTrue 	= "True"
@@ -148,36 +147,14 @@ context-free syntax
 	
 	
 context-free priorities
-{
-	Expr.IfElse
-}
->
-{
-	left: Expr.Or
-}
->
-{
-	left: Expr.And		
-}
->
-{
-	left: Expr.Not		
-}
->
-{
-  	ExprConstant.Eq 
-  	ExprConstant.NotEq 
-  	ExprConstant.GtEq 
-  	ExprConstant.Gt 
-  	ExprConstant.Lt 
-  	ExprConstant.LtEq 
-  	ExprConstant.Is
-}
->
+
 {
 	left:
-  	ExprConstant.Plus
-  	ExprConstant.Minus
+
+  	ExprConstant.Index
+  	IndexExpr.IndexExpr
+  	MemberExpr.MemberExpr
+  	ExprConstant.Member
 }
 >
 {
@@ -189,10 +166,37 @@ context-free priorities
 >
 {
 	left:
-  	ExprConstant.Index
-  	ExprConstant.MemberCall
+  	ExprConstant.Plus
+  	ExprConstant.Minus
 }
-  
+>
+{
+    ExprConstant.Eq
+    ExprConstant.NotEq
+    ExprConstant.GtEq
+    ExprConstant.Gt
+    ExprConstant.Lt
+    ExprConstant.LtEq
+    ExprConstant.Is
+}
+>
+{
+	left: Expr.Not		
+}
+>
+{
+	left: Expr.And		
+}
+>
+{
+	left: Expr.Or
+}
+>
+{
+	Expr.IfElse
+}
+
+
   //,
   //Program.JustDef > Program.Mixed
   //Block.Block > Stmt.SimpleStmt
