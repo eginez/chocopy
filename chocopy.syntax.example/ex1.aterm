@@ -1,8 +1,18 @@
 Program(
-  []
+  [ VarDefinition(VarDef(TypedVar("a", TypeID("int")), Integer("0")))
+  , VarDefinition(VarDef(TypedVar("b", CollectionType(TypeID("int"))), None()))
+  ]
 , Block(
-    [SimpleStmt(
-       Expression(Constant(Index(IdIndex("a", ExprLit(Integer("1"))))))
-     )]
+    [ SimpleStmt(
+        Expression(
+          Constant(
+            Gt(
+              VarId("a")
+            , Index(IndexExpr(VarId("b"), Constant(ExprLit(Integer("0")))))
+            )
+          )
+        )
+      )
+    ]
   )
 )

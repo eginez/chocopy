@@ -13,7 +13,8 @@ a == b
 a[3] = b[3]
 b >= c
 ab
-
+a_init = "hello"
+__init__ = "hi"
 ]] parse succeeds
 
 test not same line exp [[
@@ -30,22 +31,12 @@ test math paren [[
 (2 + 3) * 4
 ]]
 
-test priorites [[
-a > 2 * 3
-a * 2 != b * 3
-//a[1] > a[3]
-fn1() <= fn2()
-a == 2 > 3 and 2 + 4 <= 5
-]] parse succeeds
 
 test member calls [[
 a[3].fn(2)
 ]]
 
-//test fnreturarray [[
-//a.fn(2)[3]
-//a.f1() > b.f2()
-//]]
+
 
 test parse math expression [[
  2 // 3 + 4*3
@@ -211,3 +202,21 @@ def f() -> int:
 		n = 3
 a = 4
 ]] parse succeeds
+
+//test sttms in fn [[
+//def is_zero(items: [int], idx: int) -> bool:
+//  a =1 b =2
+//]] parse fails
+
+test priorites [[
+a > 2 * 3
+a * 2 != b * 3
+a[1] > a[3]
+fn1() <= fn2()
+a > b[0]
+]] parse succeeds
+
+//test fnreturarray [[
+//a.fn(2)[3]
+//a.f1() > b.f2()
+//]]
