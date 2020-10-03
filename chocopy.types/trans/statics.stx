@@ -29,7 +29,7 @@ rules
   
   
 rules
-	typeOfExp(Integer(i)) = INT().
+	//typeOfExp(Integer(i)) = INT().
 
 	programOk(Plus(expc, expc)) :- 
 	  true.
