@@ -52,14 +52,14 @@ else:
 ]] parse succeeds
 
 
-test elif [[
-if a==3:
-	n =4
-elif:
-	n =5
-else:
-	n = 6	
-]] parse succeeds
+//test elif [[
+//if a==3:
+//	n =4
+//elif:
+//	n =5
+//else:
+//	n = 6	
+//]] parse succeeds
 
 test nestedif [[
 if a==3:

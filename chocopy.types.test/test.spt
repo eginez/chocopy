@@ -1,7 +1,3 @@
 module test
 
 language chocopy
-
-test parse [[
-
-]] parse succeeds

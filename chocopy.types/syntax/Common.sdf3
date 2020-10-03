@@ -1,35 +1,51 @@
 module Common
 
 lexical sorts
-  ID INT STRING
-  STRING_CHAR BACKSLASH_CHAR
-  COMMENT_CHAR INSIDE_COMMENT
-  NEWLINE_EOF EOF
+  ID 
+  INT 
+  STRING
+  STRING_CHAR 
+  BACKSLASH_CHAR
+  COMMENT_CHAR 
+  PHYSICAL_LINE 
+  NEWLINE_EOF
+  NEWLINE
+  EOF 
 
 lexical syntax
 
-  ID               = [a-zA-Z] [a-zA-Z0-9]*
+  PHYSICAL_LINE	 	= [\n\r]
+  NEWLINE_EOF      	= PHYSICAL_LINE
+  NEWLINE_EOF      	= EOF
+  EOF              	=
+
+  ID               	= [a-zA-Z] [a-zA-Z0-9]*
+  ID				= Keyword {reject}
+  BOOLEAN_LIT		= "True"
+  BOOLEAN_LIT		= "False"
+
   INT              = "-"? [0-9]+
-  STRING           = "\"" STRING_CHAR* "\""
+
+  BACKSLASH_CHAR   = "\\"
   STRING_CHAR      = ~[\"\n]
   STRING_CHAR      = "\\\""
   STRING_CHAR      = BACKSLASH_CHAR
-  BACKSLASH_CHAR   = "\\"
+  STRING           = "\"" STRING_CHAR* "\""
+
   LAYOUT           = [\ \t\n\r]
-  COMMENT_CHAR     = [\*]
-  LAYOUT           = "/*" INSIDE_COMMENT* "*/"
-  INSIDE_COMMENT   = ~[\*]
-  INSIDE_COMMENT   = COMMENT_CHAR
-  LAYOUT           = "//" ~[\n\r]* NEWLINE_EOF
-  NEWLINE_EOF      = [\n\r]
-  NEWLINE_EOF      = EOF
-  EOF              =
+ // LAYOUT           = [\ \t]
+  
+  COMMENT_CHAR     = "#"
+
+  LAYOUT           = "#" ~[\n\r]* NEWLINE_EOF
+
+
 
 lexical restrictions
 
   // Ensure greedy matching for lexicals
   
-  COMMENT_CHAR    -/- [\/]
+  COMMENT_CHAR    -/- [\#]
   INT             -/- [0-9]
   ID              -/- [a-zA-Z0-9\_]
   
@@ -46,5 +62,44 @@ context-free restrictions
   // Ensure greedy matching for comments
   
   LAYOUT? -/- [\ \t\n\r]
-  LAYOUT? -/- [\/].[\/]
-  LAYOUT? -/- [\/].[\*]
+  //LAYOUT? -/- [\ \t]
+  LAYOUT? -/- [\#]
+  
+  
+// Keywords
+lexical syntax
+	Keyword = "False"
+    Keyword = "True"
+	Keyword = "None"
+    Keyword = "and"
+    Keyword = "as"
+    Keyword = "assert"
+    Keyword = "async"
+    Keyword = "await"
+    Keyword = "break"
+    Keyword = "class"
+    Keyword = "continue"
+    Keyword = "def"
+    Keyword = "del"
+    Keyword = "elif"
+    Keyword = "else"
+    Keyword = "except"
+    Keyword = "finally"
+    Keyword = "for"
+    Keyword = "from"
+    Keyword = "global"
+    Keyword = "if"
+    Keyword = "import"
+    Keyword = "in"
+    Keyword = "is"
+    Keyword = "lambda"
+    Keyword = "nonlocal"
+    Keyword = "not"
+    Keyword = "or"
+    Keyword = "pass"
+    Keyword = "raise"
+    Keyword = "return"
+    Keyword = "try"
+    Keyword = "while"
+    Keyword = "with"
+    Keyword = "yield"

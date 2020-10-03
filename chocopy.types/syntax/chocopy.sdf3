@@ -6,12 +6,163 @@ imports
 
 context-free start-symbols
   
-  Start
+  Program
 
 context-free sorts
 
-  Start
+  Exp
+  Def
+  Stmt
+  SimpleStmt
+  Target
+  Declaration
+  TypedVar
+  Type
+  Expr
+  ExprConstant
+  MemberExpr
+  IndexExpr
+  Operator
+  Literal
+  Program
+  Block
+  IfBlock
+  ElseIfBlock
+  ElifBlock
+  ElseBlock
+  VarDef
+  FunctionDeclarations
+  FunctionDef
+  FunctionBody
+  AllDefinitions
+  ClassDef
+  ClassBody
+  
 
 context-free syntax
+
+	
+	//This is ambigous
+	//Program.Start = <<AllDefinitions*> <Stmt*>>
+	Program.Start = <<AllDefinitions*>>
+	Program.Start2 = <<Stmt*>>
+	
+	AllDefinitions.FunctionDefinition = <<FunctionDef>>
+	AllDefinitions.VarDefinition = <<VarDef>>
+	AllDefinitions.ClassDefinition = <<ClassDef>>
+
+
+	//TODO fix function def to support multiargs
+	FunctionDef.FnDef = "def" ID"(" TypedVar ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
+	FunctionBody.FnBody = <<FunctionDeclarations*><Stmt+>>
+	
+	ClassDef.ClsDef = "class" ID"(" ID ")" ":" clsBody:ClassBody {layout(newline-indent "class" clsBody)}
+	
+	ClassBody.ClsEmpty = "pass"
+	ClassBody.ClsVars = <<VarDef+>>
+	ClassBody.ClsFn = <<FunctionDef+>>
+	
+	
+	
+	
+
+	//block = NEWLINE INDENT stmt+ DEDENT
+	Block.Block = sts:Stmt+ {layout(align-list sts)}
+
+	
+	IfBlock.IfBlock = "if" Expr":" blk:Block {layout(newline-indent "if" blk)}
+	ElseBlock.ElseBlock = "else:" blk:Block {layout(newline-indent "else:" blk)}
+	ElifBlock.ElifBlock = "elif" Expr ":" blk:Block {layout(newline-indent "elif" blk)}
+	
+	Stmt.StmtIfElse = ifBlk:IfBlock elseBlk:ElseBlock? {layout(align ifBlk elseBlk)}
+	//TODO
+	//Stmt.StmtIfAll = ifBlk:IfBlock elifBlk:ElifBlock* elseBlk:ElseBlock? {layout(align ifBlk elifBlk && align elifBlk elseBlk )}
+	Stmt.While = "while" Expr":" blk:Block {layout(newline-indent "while" blk)}
+	Stmt.For = "for" ID "in" Expr":" blk:Block {layout(newline-indent "for" blk)}
+	Stmt.SimpleStmt = <<SimpleStmt>>
+	
+
+	SimpleStmt.Pass = <pass>
+	SimpleStmt.Expression = <<Expr>>
+	SimpleStmt.RetSimpleStmt = <return <Expr?>>
+	SimpleStmt.TargetSimpleStmt = <<Target> = <Expr>> 
+	//TODO SimpleStmt.TargetSimpleStmt = <<{Target "="}+> <Expr>>
+
+	Target.Identifier = <<ID>>
+	Target.TargetMember = <<MemberExpr>>
+	Target.TargetIndex = <<IndexExpr>>
+	
+	Type.TypeID = <<ID>>
+	Type.TypeString = <<STRING>>
+	Type.CollectionType = <[<Type>]>
+	
+	TypedVar.TypedVar = <<ID> : <Type>>
+
+	Declaration.Global 		= <global <ID>>
+	Declaration.NonLocal 	= <nonlocal <ID>>
+
+	VarDef.VarDef = <<TypedVar> = <Literal>>
+	
+	FunctionDeclarations.FnLocalGlobals = <<Declaration>>
+	FunctionDeclarations.FnVarDef = <<VarDef>> 
+	FunctionDeclarations.FnFnDef = <<FunctionDef>>
+	
+	
+	
+
+	
+
+	
+	Expr.NotExpr	= <not <Expr>>
+	Expr.And		= <<Expr> and <Expr>>					{left}
+	Expr.Or			= <<Expr> or <Expr>>					{left}
+	Expr.IfElse		= <<Expr> if <Expr> else <Expr>>		{right}
+	Expr.Constant	= <<ExprConstant>>
+	
+	ExprConstant.VarId		= <<ID>>
+	ExprConstant.ExprLit 	= <<Literal>>
+	ExprConstant.ListLit 	=  <[<{Expr ", "}*>]>
+	ExprConstant.ParenLit 	= <(<Expr>)>
+	ExprConstant.Index		= <<ExprConstant>[<ExprConstant>]>
+	ExprConstant.MemberCall	= <<MemberExpr>(<{Expr ","}*>)>
+	ExprConstant.FuncCall	= <<ID>(<{Expr ","}*>)>
+	ExprConstant.Plus	= <<ExprConstant> + <ExprConstant>>		{left}
+	ExprConstant.Minus	= <<ExprConstant> - <ExprConstant>>		{left}
+	ExprConstant.Times	= <<ExprConstant> * <ExprConstant>>		{left}
+	ExprConstant.Div	= <<ExprConstant> // <ExprConstant>>	{left}
+	ExprConstant.Mod	= <<ExprConstant> % <ExprConstant>>		{left}
+	ExprConstant.Eq		= <<ExprConstant> == <ExprConstant>>		
+	ExprConstant.NotEq	= <<ExprConstant> != <ExprConstant>>		
+	ExprConstant.GtEq	= [[ExprConstant] >= [ExprConstant]]		
+	ExprConstant.Gt		= [[ExprConstant] > [ExprConstant]]		
+	ExprConstant.LtEq	= [[ExprConstant] <= [ExprConstant]]		
+	ExprConstant.Lt		= [[ExprConstant] < [ExprConstant]]		
+	ExprConstant.Is		= [[ExprConstant] is [ExprConstant]]		
+
+
+
+	MemberExpr.MemberExpr 	= <<ExprConstant>.<ID>>
+	
+	IndexExpr.IndexExpr		= <<ExprConstant>[<ExprConstant>]>
+	
+	Literal.None 		= "None"
+	Literal.LitTrue 	= "True"
+	Literal.LitFalse	= "False"
+	Literal.Integer 	= <<INT>>
+	Literal.String 		= <<STRING>>
+	//Possible Fix this Literal.IdString	=<<IdString>>
+	
+	
+	
+context-free priorities
+
+  {ExprConstant.Times} > {ExprConstant.Plus ExprConstant.Minus}
   
-  Start.Empty = <>
+  //Fix this
+ // AllDefinitions > Stmt
+  
+	
+	
+	
+
+
