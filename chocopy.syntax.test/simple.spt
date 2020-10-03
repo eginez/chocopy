@@ -5,6 +5,7 @@ start symbol Program
 
 test test simple expressions [[
 [1,23]
+"\"He\nllo\""
 []
 a+3
 a // b
@@ -12,7 +13,33 @@ a == b
 a[3] = b[3]
 b >= c
 ab
+a_init = "hello"
+__init__ = "hi"
+]] parse succeeds
 
+test not same line exp [[
+1 * 
+1
+]] parse fails
+
+test not same line exp2 [[
+a
+.b()
+]] parse fails
+
+test math paren [[
+(2 + 3) * 4
+]]
+
+
+test member calls [[
+a[3].fn(2)
+]]
+
+
+
+test parse math expression [[
+ 2 // 3 + 4*3
 ]] parse succeeds
 
 test parse comments [[
@@ -34,14 +61,10 @@ test badif [[
 ]] parse fails
 
 test badif2 [[
-if a==3: 
-n
-
 if a==3:
 	n
 	else:
 		n
-
 ]] parse fails
 
 test if1 [[
@@ -52,15 +75,25 @@ else:
 ]] parse succeeds
 
 
-//test elif [[
-//if a==3:
-//	n =4
-//elif:
-//	n =5
-//else:
-//	n = 6	
-//]] parse succeeds
+test elif [[
+if a==3:
+	n =4
+elif n == 4:
+	n =5
+else:
+	n = 6	
+]] parse succeeds
 
+test elif3 [[
+if a == 3:
+	n = 4
+elif a ==4:
+	n = 5
+elif a == 5:
+	n =5
+else:
+	n = 3
+]]
 test nestedif [[
 if a==3:
 	n
@@ -95,16 +128,95 @@ test bad while [[
 while True:
 ]] parse fails
 
-test simple fn decl [[
+test multiple fn decl [[
 def fn(a:int) -> int:
+	a = 1
+	b = 1
+	a = a + b
+	return a
+def fn(a: int, b:int) -> int:
 	a = 1
 	a = 2
 	return a
-]]
+
+def fn() -> int:
+	a = 1
+	a = 2
+	return a
+]] parse succeeds
 
 
 test class def [[
 class One(Object):
 	a:int = 1
-	
+	def one() -> int:
+		return 1
 ]] 
+
+
+test classfn [[
+class One(Object):
+	a:int = 1
+def fn(a: int) -> int:
+	a = 1
+]]
+
+
+test classfnonly [[
+class A(Object):
+	def fn() -> int:
+		b: int = 1
+		f = 1
+		f = 2
+a = 1
+b = 1
+]] parse succeeds
+
+test classfnstat [[
+def fn() -> int:
+	return 1
+class A(Object):
+	def one() -> int:
+		return 1
+a = 1
+]] parse succeeds
+
+test classvarfn [[
+class A(Object):
+	a: int = 1
+	def fn() -> int:
+		b: int = 1
+		f = 1
+		f = 2
+a = 1
+b = 1
+]]parse succeeds
+
+test multifn [[
+def f() -> int:
+	a = 1
+	a = 2
+	a = 3
+	def f() -> int:
+		n = 5
+		n = 3
+a = 4
+]] parse succeeds
+
+//test sttms in fn [[
+//def is_zero(items: [int], idx: int) -> bool:
+//  a =1 b =2
+//]] parse fails
+
+test priorites [[
+a > 2 * 3
+a * 2 != b * 3
+a[1] > a[3]
+fn1() <= fn2()
+a > b[0]
+]] parse succeeds
+
+//test fnreturarray [[
+//a.fn(2)[3]
+//a.f1() > b.f2()
+//]]

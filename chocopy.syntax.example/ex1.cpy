@@ -1,8 +1,4 @@
-def fn(a:int) -> int:
-	a = 1
-	a = 2
-	return a
-
-class One(Object):
-	a:int = 1
-	
+a: int = 0
+b: [int] = None
+a > b[0]
+n = 1

@@ -1,26 +1,18 @@
-Start(
-  [ FunctionDefinition(
-      FnDef(
-        "fn"
-      , TypedVar("a", TypeID("int"))
-      , TypeID("int")
-      , FnBody(
-          []
-        , [ SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))
-          , SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))
-          , SimpleStmt(RetSimpleStmt(Some(Constant(VarId("a")))))
-          ]
-        )
-      )
-    )
-  , ClassDefinition(
-      ClsDef(
-        "One"
-      , "Object"
-      , ClsVars(
-          [VarDef(TypedVar("a", TypeID("int")), Integer("1"))]
-        )
-      )
-    )
+Program(
+  [ VarDefinition(VarDef(TypedVar("a", TypeID("int")), Integer("0")))
+  , VarDefinition(VarDef(TypedVar("b", CollectionType(TypeID("int"))), None()))
   ]
+, Block(
+    [ SimpleStmt(
+        Expression(
+          Constant(
+            Gt(
+              VarId("a")
+            , Index(IndexExpr(VarId("b"), Constant(ExprLit(Integer("0")))))
+            )
+          )
+        )
+      )
+    ]
+  )
 )
