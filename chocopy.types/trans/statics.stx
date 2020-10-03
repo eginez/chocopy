@@ -1,24 +1,36 @@
 module statics
+imports signatures/chocopy-sig
 
 // see README.md for details on how to switch to multi-file analysis
 
 rules // single-file entry point
 
-  programOk : Program
+  //programOk : Program
+  programOk : ExprConstant
 
-  programOk(Empty()).
+//  programOk(Empty()).
 
-rules // multi-file entry point
-
-  projectOk : scope
-
-  projectOk(s).
-
-  fileOk : scope * Program
-
-  fileOk(s, Empty()).
+//rules // multi-file entry point
+//
+//  projectOk : Program
+//
+//  //projectOk(s).
+//
+//  fileOk : scope * Program
+//
+//  fileOk(s, Empty()).
 
 signature
 
-  sorts Program constructors
-    Empty : Program
+    
+rules
+  
+  typeOfExp: ExprConstant -> Type
+  
+  
+rules
+	typeOfExp(Integer(i)) = INT().
+
+	programOk(Plus(expc, expc)) :- 
+	  true.
+
