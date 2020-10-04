@@ -1,33 +1,35 @@
 module statics
 imports signatures/chocopy-sig
 
-// see README.md for details on how to switch to multi-file analysis
+// We expect to get these types in the grading pipeline
+// you are free to use your own (custom) types in your Statix file
+// as long as you write transformation rules from your types to our types
+// in resolve-type
 signature
-	constructors
+  sorts
 
-	BOOL: 		TYPE
-	INT:		TYPE
-	STRING: 	TYPE
-	NONE:		TYPE
+  constructors
+    Int : Type
+    Bool : Type
+    String : Type
+    ClassType : ID -> Type
+    List : Type -> Type
+    NoneType : Type
+    EmptyList : Type
+	Object : Type
+
+// Here you can define the signature of the types you have used in your Statix definiions.
+// This is just an example on how to do it.
+// signature 
+//   sorts
+//     MyCustomType
+//
+//  constructors
+//    MyCustomIntType : MyCustomType
 
 rules // single-file entry point
 
 	programOk : Program
-  	//programOk : Literal
-
-//  programOk(Empty()).
-
-//rules // multi-file entry point
-//
-//  projectOk : Program
-//
-//  //projectOk(s).
-//
-//  fileOk : scope * Program
-//
-//  fileOk(s, Empty()).
-
-
     
 rules
   
@@ -36,12 +38,11 @@ rules
   
   simpleStmtOk: scope * SimpleStmt
   
-  exprOk: scope * Expr
 
-//Constant Expressions
-  cexprOk: scope * ExprConstant -> TYPE
-  
-  literalOk: scope * Literal -> TYPE
+//Expressions
+  exprOk: scope * Expr -> Type
+  cexprOk: scope * ExprConstant -> Type
+  literalOk: scope * Literal -> Type
   
   
   
@@ -61,27 +62,47 @@ rules
 	stmtOk(s, SimpleStmt(simple)) :-
 		simpleStmtOk(s, simple).
 	
-	simpleStmtOk(s, Expression(expr)) :-
-		exprOk(s, expr).
+	simpleStmtOk(s, Expression(expr)) :- {T}
+		exprOk(s, expr) == T.
 	
 ////////////Expressions///////////////////////////////
-	exprOk(s, Not(expr)) :-
-		exprOk(s, expr).
+	exprOk(s, Not(expr)) = T :-
+		exprOk(s, expr) == T.
 
-	exprOk(s, Constant(cexpr)):- {T}
-		cexprOk(s, cexpr) == T.
+	exprOk(s, e@Constant(cexpr)) = T :-
+		cexprOk(s, cexpr) == T,
+		@e.type := T.
+
 		
 		
 ////////////Constant Expressions///////////////////////////////
-	cexprOk(s, ExprLit(l)) = T :- 
-		literalOk(s, l) == T.
+	cexprOk(s, e@Plus(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == T2 | error $[for additions types [T1] and [T2] need to match],
+		T == T1,
+		@e.type := T.
+
+	cexprOk(s, e@Eq(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == T2 | error $[for equality types [T1] and [T2] need to match],
+		T == T1,
+		@e.type := T.
+		
+	cexprOk(s, e@ExprLit(l)) = T :- 
+		literalOk(s, l) == T,
+		@e.type := T.
+		
 	
 ////////////Literals Expressions///////////////////////////////
-	literalOk(s, LitTrue()) = BOOL().
-	literalOk(s, LitFalse()) = BOOL().
-	literalOk(s, None()) = NONE().
-	literalOk(s, Integer(x)) = INT().
-	literalOk(s, String(x)) = STRING().
+	literalOk(s, Integer(x)) = Int().
+
+	literalOk(s, String(x)) = String().
+	literalOk(s, LitFalse()) = Bool().
+	literalOk(s, LitTrue()) = Bool().
+	literalOk(s, None()) = NoneType().
+		
 
 		
 		

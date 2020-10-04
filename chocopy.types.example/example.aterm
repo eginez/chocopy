@@ -1,0 +1,18 @@
+Program(
+  []
+, Block(
+    [ While(
+        Constant(VarId("a"))
+      , Block(
+          [ SimpleStmt(
+              TargetSimpleStmt(
+                TargetIndex(IndexExpr(ExprLit(None()), Constant(ExprLit(None()))))
+              , Constant(ExprLit(LitTrue()))
+              )
+            )
+          ]
+        )
+      )
+    ]
+  )
+)

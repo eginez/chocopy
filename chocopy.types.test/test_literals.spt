@@ -1,0 +1,38 @@
+module test
+
+language chocopy
+start symbol Program
+
+test lit1 [[
+[[2]] + 1 
+]] run get-type on #1 to Int()
+
+
+test lit2 [[
+[[True]] == True
+]] run get-type on #1 to Bool()
+
+test lit string [[
+[["asdf"]] == "asdf"
+]] run get-type on #1 to String()
+
+test lit3 [[
+True
+]] analysis succeeds
+
+test lit4 [[
+None
+]] analysis succeeds
+
+test plus [[
+2 + 3
+]] analysis succeeds
+
+test plus string [[
+"asdb" + "asd"
+]] analysis succeeds
+
+test bad plus [[
+2 + True
+]] analysis fails
+

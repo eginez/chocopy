@@ -1,0 +1,4 @@
+Program(
+  []{TermIndex("example.cpy", 2)}
+, Block([SimpleStmt(Expression(Constant(ExprLit(String("\"asd\""{TermIndex("example.cpy", 3)}){TermIndex("example.cpy", 4)}){TermIndex("example.cpy", 5)}){TermIndex("example.cpy", 6)}){TermIndex("example.cpy", 7)}){TermIndex("example.cpy", 8)}]{TermIndex("example.cpy", 11)}){TermIndex("example.cpy", 12)}
+){TermIndex("example.cpy", 13)}
