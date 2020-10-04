@@ -16,6 +16,10 @@ test lit string [[
 [["asdf"]] == "asdf"
 ]] run get-type on #1 to String()
 
+test lit none [[
+[[None]] == None
+]] run get-type on #1 to NoneType()
+
 test lit3 [[
 True
 ]] analysis succeeds
@@ -34,5 +38,9 @@ test plus string [[
 
 test bad plus [[
 2 + True
+]] analysis fails
+
+test bad plus bool [[
+True + True
 ]] analysis fails
 

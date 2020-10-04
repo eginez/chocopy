@@ -79,16 +79,46 @@ rules
 	cexprOk(s, e@Plus(ec1,ec2)) = T :- {T1 T2}
 		cexprOk(s, ec1) == T1,
 		cexprOk(s, ec2) == T2,
+		T1 != Bool(),
+		T2 != Bool(),
 		T1 == T2 | error $[for additions types [T1] and [T2] need to match],
 		T == T1,
 		@e.type := T.
 
-	cexprOk(s, e@Eq(ec1,ec2)) = T :- {T1 T2}
+	cexprOk(s, e@Times(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for mult types the type of [ec1] needs to be int],
+		T2 == Int() | error $[for mult types the type of [ec2] needs to be int],
+		@e.type := Int().
+
+	cexprOk(s, e@Div(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for division types the type of [ec1] needs to be int],
+		T2 == Int() | error $[for division types the type of [ec2] needs to be int],
+		@e.type := Int().
+
+	cexprOk(s, e@Mod(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for modulus types the type of [ec1] needs to be int],
+		T2 == Int() | error $[for modulus types the type of [ec2] needs to be int],
+		@e.type := Int().
+
+	cexprOk(s, e@Minus(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for substraction the type of [ec1] needs to be int],
+		T2 == Int() | error $[for substraction the type of [ec2] needs to be int],
+		@e.type := Int().
+
+
+	cexprOk(s, e@Eq(ec1,ec2)) = Bool() :- {T1 T2}
 		cexprOk(s, ec1) == T1,
 		cexprOk(s, ec2) == T2,
 		T1 == T2 | error $[for equality types [T1] and [T2] need to match],
-		T == T1,
-		@e.type := T.
+		@e.type := Bool().
 		
 	cexprOk(s, e@ExprLit(l)) = T :- 
 		literalOk(s, l) == T,
