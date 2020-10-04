@@ -44,3 +44,31 @@ test bad plus bool [[
 True + True
 ]] analysis fails
 
+test minus [[
+2 - 3
+]] analysis succeeds
+
+test minus bool [[
+True - 3
+]] analysis fails
+
+test minus string [[
+"asdf" - "asdf"
+]] analysis fails
+
+test times  [[
+-234 * 43
+]] analysis succeeds
+
+test div  [[
+-234 // 43
+]] analysis succeeds
+
+test bad times bool  [[
+-234 * True
+]] analysis fails
+
+test bad mod string  [[
+-234 % "asdf"
+]] analysis fails
+
