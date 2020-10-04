@@ -2,11 +2,18 @@ module statics
 imports signatures/chocopy-sig
 
 // see README.md for details on how to switch to multi-file analysis
+signature
+	constructors
+
+	BOOL: 		TYPE
+	INT:		TYPE
+	STRING: 	TYPE
+	NONE:		TYPE
 
 rules // single-file entry point
 
-  //programOk : Program
-  programOk : ExprConstant
+	programOk : Program
+  	//programOk : Literal
 
 //  programOk(Empty()).
 
@@ -20,17 +27,65 @@ rules // single-file entry point
 //
 //  fileOk(s, Empty()).
 
-signature
 
     
 rules
   
-  typeOfExp: ExprConstant -> Type
+  stmtOk: scope * Stmt
+  stmtsOk maps stmtOk(*, list(*))
   
+  simpleStmtOk: scope * SimpleStmt
+  
+  exprOk: scope * Expr
+
+//Constant Expressions
+  cexprOk: scope * ExprConstant -> TYPE
+  
+  literalOk: scope * Literal -> TYPE
+  
+  
+  
+
+  blockOk: scope * Block
+
   
 rules
-	//typeOfExp(Integer(i)) = INT().
 
-	programOk(Plus(expc, expc)) :- 
-	  true.
+	programOk(Program(defs, block)) :- {s}
+		new s, //TODO fix this
+		blockOk(s, block).
+
+	blockOk(s, Block(ls)) :-
+		stmtsOk(s, ls).
+		
+	stmtOk(s, SimpleStmt(simple)) :-
+		simpleStmtOk(s, simple).
+	
+	simpleStmtOk(s, Expression(expr)) :-
+		exprOk(s, expr).
+	
+////////////Expressions///////////////////////////////
+	exprOk(s, Not(expr)) :-
+		exprOk(s, expr).
+
+	exprOk(s, Constant(cexpr)):- {T}
+		cexprOk(s, cexpr) == T.
+		
+		
+////////////Constant Expressions///////////////////////////////
+	cexprOk(s, ExprLit(l)) = T :- 
+		literalOk(s, l) == T.
+	
+////////////Literals Expressions///////////////////////////////
+	literalOk(s, LitTrue()) = BOOL().
+	literalOk(s, LitFalse()) = BOOL().
+	literalOk(s, None()) = NONE().
+	literalOk(s, Integer(x)) = INT().
+	literalOk(s, String(x)) = STRING().
+
+		
+		
+
+
+		
 

@@ -1,3 +1,20 @@
 module test
 
 language chocopy
+start symbol Program
+
+test lit1 [[
+"hello"
+]] analysis succeeds
+
+test lit2 [[
+-12
+]] analysis succeeds
+
+test lit3 [[
+True
+]] analysis succeeds
+
+test lit4 [[
+None
+]] analysis succeeds

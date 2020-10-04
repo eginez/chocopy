@@ -38,6 +38,7 @@ context-free sorts
   AllDefinitions
   ClassDef
   ClassBody
+  TYPE
   
 
 context-free syntax
