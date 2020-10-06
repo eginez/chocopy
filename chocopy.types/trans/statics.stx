@@ -37,21 +37,33 @@ rules
   stmtsOk maps stmtOk(*, list(*))
   
   simpleStmtOk: scope * SimpleStmt
-  
+
 
 //Expressions
   exprOk: scope * Expr -> Type
   cexprOk: scope * ExprConstant -> Type
   literalOk: scope * Literal -> Type
+ 
+ 
+  blockOk: scope * Block
+
+//Utils
+	notSimpleType: Type
   
   
   
 
-  blockOk: scope * Block
 
   
 rules
 
+
+////////////Utils///////////////////////////////
+	notSimpleType(Int()) :- false.
+	notSimpleType(String()) :- false.
+	notSimpleType(Bool()) :- false.
+
+////////////Syntax///////////////////////////////
 	programOk(Program(defs, block)) :- {s}
 		new s, //TODO fix this
 		blockOk(s, block).
@@ -64,18 +76,47 @@ rules
 	
 	simpleStmtOk(s, Expression(expr)) :- {T}
 		exprOk(s, expr) == T.
+
+////////////VarDef///////////////////////////////
+
 	
 ////////////Expressions///////////////////////////////
-	exprOk(s, Not(expr)) = T :-
-		exprOk(s, expr) == T.
+
+	exprOk(s, e@Not(expr1)) = T :- {T1}
+		exprOk(s, expr1) == T1,
+		T1 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		@e.type := Bool().
+	
+	exprOk(s, e@And(expr1, expr2)) = T :- {T1 T2}
+		exprOk(s, expr1) == T1,
+		exprOk(s, expr2) == T2,
+		T1 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		T2 == Bool()| error $[or requires a boolean type on the LHS for [T2]],
+		@e.type := Bool().
+
+	exprOk(s, e@Or(expr1, expr2)) = T :- {T1 T2}
+		exprOk(s, expr1) == T1,
+		exprOk(s, expr2) == T2,
+		T1 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		T2 == Bool()| error $[or requires a boolean type on the LHS for [T2]],
+		@e.type := Bool().
+
+	exprOk(s, e@IfElse(expr1, expr2, expr3)) = T :- {T1 T2 T3}
+		exprOk(s, expr1) == T1,
+		exprOk(s, expr2) == T2,
+		exprOk(s, expr3) == T3,
+		T2 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		@e.type := Bool().
+
+
 
 	exprOk(s, e@Constant(cexpr)) = T :-
 		cexprOk(s, cexpr) == T,
 		@e.type := T.
-
 		
 		
 ////////////Constant Expressions///////////////////////////////
+
 	cexprOk(s, e@Plus(ec1,ec2)) = T :- {T1 T2}
 		cexprOk(s, ec1) == T1,
 		cexprOk(s, ec2) == T2,
@@ -114,10 +155,48 @@ rules
 		@e.type := Int().
 
 
+
 	cexprOk(s, e@Eq(ec1,ec2)) = Bool() :- {T1 T2}
 		cexprOk(s, ec1) == T1,
 		cexprOk(s, ec2) == T2,
 		T1 == T2 | error $[for equality types [T1] and [T2] need to match],
+		@e.type := Bool().
+
+	cexprOk(s, e@NotEq(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == T2 | error $[for non-equality types [T1] and [T2] need to match],
+		@e.type := Bool().
+
+	cexprOk(s, e@GtEq(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@LtEq(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@Gt(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@Lt(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@Is(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		notSimpleType(T1) | error $[Is can not operate simple types not on [T1]],
+		notSimpleType(T2) | error $[Is can not operate on simple types not on [T2]],
 		@e.type := Bool().
 		
 	cexprOk(s, e@ExprLit(l)) = T :- 
@@ -127,7 +206,6 @@ rules
 	
 ////////////Literals Expressions///////////////////////////////
 	literalOk(s, Integer(x)) = Int().
-
 	literalOk(s, String(x)) = String().
 	literalOk(s, LitFalse()) = Bool().
 	literalOk(s, LitTrue()) = Bool().

@@ -72,3 +72,22 @@ test bad mod string  [[
 -234 % "asdf"
 ]] analysis fails
 
+test gt eq int [[
+2 >= 3
+]] analysis succeeds
+
+test bad gt eq string [[
+2 > "ha"
+]] analysis fails
+
+test is [[
+"is" is "ha"
+]] analysis fails
+
+test is int [[
+2 is 2
+]] analysis fails
+
+test bad is boolean [[
+2 is False
+]] analysis fails
