@@ -1,0 +1,16 @@
+module test
+
+language chocopy
+start symbol Program
+
+test simple var [[
+a: int = 0
+]] analysis succeeds
+
+test simple var string [[
+a: str = "assdf"
+]] analysis succeeds
+
+test simple bad var  [[
+a: int = "0"
+]] analysis fails

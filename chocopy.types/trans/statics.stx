@@ -7,16 +7,17 @@ imports signatures/chocopy-sig
 // in resolve-type
 signature
   sorts
+  	TYPE
 
   constructors
-    Int : Type
-    Bool : Type
-    String : Type
-    ClassType : ID -> Type
-    List : Type -> Type
-    NoneType : Type
-    EmptyList : Type
-	Object : Type
+    Int : TYPE
+    Bool : TYPE
+    String : TYPE
+    ClassType : ID -> TYPE
+    List : TYPE -> TYPE
+    NoneType : TYPE
+    EmptyList : TYPE
+	Object : TYPE
 
 // Here you can define the signature of the types you have used in your Statix definiions.
 // This is just an example on how to do it.
@@ -26,6 +27,9 @@ signature
 //
 //  constructors
 //    MyCustomIntType : MyCustomType
+
+  relations
+  	var : ID -> TYPE
 
 rules // single-file entry point
 
@@ -40,15 +44,26 @@ rules
 
 
 //Expressions
-  exprOk: scope * Expr -> Type
-  cexprOk: scope * ExprConstant -> Type
-  literalOk: scope * Literal -> Type
+  exprOk: scope * Expr -> TYPE
+  cexprOk: scope * ExprConstant -> TYPE
+  literalOk: scope * Literal -> TYPE
  
  
   blockOk: scope * Block
 
+//Definitions
+	defOk: scope * AllDefinitions
+	defsOk maps defOk(*, list(*))
+
+	varDefOk: scope * VarDef -> TYPE
+	declareVar: scope * TypedVar -> TYPE
+	typedVarToID: scope * TypedVar -> ID
+	typeOfVar: scope * TypedVar -> TYPE
+	resolveVar: scope * ID -> list((path * (ID * TYPE)))
+	typeOfType: scope * Type -> TYPE
+
 //Utils
-	notSimpleType: Type
+	notSimpleType: TYPE
   
   
   
@@ -66,7 +81,13 @@ rules
 ////////////Syntax///////////////////////////////
 	programOk(Program(defs, block)) :- {s}
 		new s, //TODO fix this
+		defsOk(s, defs),
 		blockOk(s, block).
+
+	programOk(ProgramOne(defs)) :- {s}
+		new s, //TODO fix this
+		defsOk(s, defs).
+
 
 	blockOk(s, Block(ls)) :-
 		stmtsOk(s, ls).
@@ -78,6 +99,38 @@ rules
 		exprOk(s, expr) == T.
 
 ////////////VarDef///////////////////////////////
+	typeOfType(s, e@TypeID("int")) = Int().
+	typeOfType(s, e@TypeID("str")) = String().
+	typeOfType(s, e@TypeID("bool")) = Bool().
+	typeOfType(s, e@TypeID(x)) = Object().
+
+
+	declareVar(s, e@TypedVar(id, t)) = T :-
+		typeOfType(s, t) == T,
+		!var[id, T] in s,
+		@e.type := T.
+		
+
+	resolveVar(s, x) = ps :-
+		query var
+			filter e and {x' :- x' == x}
+			min and true
+			in s |-> ps.
+
+	typeOfVar(s, TypedVar(x, t)) = T :- {x'}
+		resolveVar(s, x) == [(_,(x', T))].
+	
+		
+	varDefOk(s, e@VarDef(tv, l)) = T :- {T1 T2}
+		declareVar(s, tv) == T1,
+		literalOk(s, l) == T2,
+		T1 == T2 | error $[the type of the var [T1] does not match the literal type [T2]],
+		@e.type := T.
+
+
+		
+	defOk(s, e@VarDefinition(x)) :- {T}
+		varDefOk(s, x) == T.
 
 	
 ////////////Expressions///////////////////////////////
