@@ -111,3 +111,11 @@ test list concat [[
 test list concat bad [[
 [1, 2, 3] +  ["asd"]
 ]] analysis fails
+
+test list access [[
+a[1]
+]] analysis succeeds
+
+test bad list access [[
+a["asd"]
+]] analysis fails

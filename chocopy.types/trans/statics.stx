@@ -47,6 +47,7 @@ rules
   exprOk: scope * Expr -> TYPE
   cexprOk: scope * ExprConstant -> TYPE
   literalOk: scope * Literal -> TYPE
+  indexExprOk: scope * IndexExpr
  
  
   blockOk: scope * Block
@@ -279,6 +280,12 @@ rules
 		x == [n | _],
 		T == exprOk(s, n) | error $[all elements of the list need to be the same?],
 		@e.type := T.
+		
+	cexprOk(s, e@Index(x)) = T :-  
+		indexExprOk(s, x).
+	
+	indexExprOk(s, IndexExpr(name, idx)) :-
+		exprOk(s, idx) == Int() | error $[index must be of type int in expr $[idx]].
 
 
 		
