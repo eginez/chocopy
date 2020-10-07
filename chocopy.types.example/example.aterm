@@ -1,3 +1,6 @@
-ProgramOne(
-  [VarDefinition(VarDef(TypedVar("a", TypeID("Int")), Integer("0")))]
+Program(
+  [VarDefinition(VarDef(TypedVar("a", CollectionType(TypeID("int"))), None()))]
+, Block(
+    [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ListLit([]))))]
+  )
 )

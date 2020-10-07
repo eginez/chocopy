@@ -11,6 +11,14 @@ test simple var string [[
 a: str = "assdf"
 ]] analysis succeeds
 
+test simple var boolean [[
+a: bool = True
+]] analysis succeeds
+
 test simple bad var  [[
 a: int = "0"
 ]] analysis fails
+
+test simple list [[
+a: [int] = None
+]] analysis succeeds

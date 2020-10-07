@@ -91,3 +91,7 @@ test is int [[
 test bad is boolean [[
 2 is False
 ]] analysis fails
+
+test empty list [[
+[]
+]] analysis succeeds

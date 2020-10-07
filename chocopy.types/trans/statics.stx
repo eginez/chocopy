@@ -64,6 +64,7 @@ rules
 
 //Utils
 	notSimpleType: TYPE
+	sameTypes: TYPE * TYPE
   
   
   
@@ -77,7 +78,9 @@ rules
 	notSimpleType(Int()) :- false.
 	notSimpleType(String()) :- false.
 	notSimpleType(Bool()) :- false.
-
+	sameTypes(x, x) :- true.
+	sameTypes(List(x), NoneType) :- true.
+	
 ////////////Syntax///////////////////////////////
 	programOk(Program(defs, block)) :- {s}
 		new s, //TODO fix this
@@ -99,10 +102,16 @@ rules
 		exprOk(s, expr) == T.
 
 ////////////VarDef///////////////////////////////
+
 	typeOfType(s, e@TypeID("int")) = Int().
 	typeOfType(s, e@TypeID("str")) = String().
 	typeOfType(s, e@TypeID("bool")) = Bool().
 	typeOfType(s, e@TypeID(x)) = Object().
+	typeOfType(s, e@CollectionType(x)) = T :- {T1}
+		typeOfType(s, x) == T1,
+		T == List(T1),
+		@e.type := List(T1).
+		
 
 
 	declareVar(s, e@TypedVar(id, t)) = T :-
@@ -124,7 +133,8 @@ rules
 	varDefOk(s, e@VarDef(tv, l)) = T :- {T1 T2}
 		declareVar(s, tv) == T1,
 		literalOk(s, l) == T2,
-		T1 == T2 | error $[the type of the var [T1] does not match the literal type [T2]],
+		sameTypes(T1, T2) | error $[the type of the var [T1] does not match the literal type [T2]],
+		T1 == T,
 		@e.type := T.
 
 
@@ -255,6 +265,18 @@ rules
 	cexprOk(s, e@ExprLit(l)) = T :- 
 		literalOk(s, l) == T,
 		@e.type := T.
+
+	cexprOk(s, e@ListLit([])) = T :- 
+		T == EmptyList(),
+		@e.type := T.
+
+//TODO fix this we need all the elements of the list to be the same
+	cexprOk(s, e@ListLit(x)) = T :-  {n}
+		[n, _] == x,
+		T == exprOk(s, n),
+		@e.type := T.
+
+
 		
 	
 ////////////Literals Expressions///////////////////////////////
