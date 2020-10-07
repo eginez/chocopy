@@ -95,3 +95,19 @@ test bad is boolean [[
 test empty list [[
 []
 ]] analysis succeeds
+
+test list of one [[
+[1]
+]] analysis succeeds
+
+test list of many [[
+[1, 2, 3]
+]] analysis succeeds
+
+test list concat [[
+[1, 2, 3] + [1]
+]] analysis succeeds
+
+test list concat bad [[
+[1, 2, 3] +  ["asd"]
+]] analysis fails

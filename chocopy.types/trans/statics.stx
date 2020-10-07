@@ -65,6 +65,7 @@ rules
 //Utils
 	notSimpleType: TYPE
 	sameTypes: TYPE * TYPE
+	canAdd: TYPE * TYPE
   
   
   
@@ -78,8 +79,13 @@ rules
 	notSimpleType(Int()) :- false.
 	notSimpleType(String()) :- false.
 	notSimpleType(Bool()) :- false.
+
 	sameTypes(x, x) :- true.
 	sameTypes(List(x), NoneType) :- true.
+
+	canAdd(Int(), Int()).
+	canAdd(String(), String()).
+	canAdd(List(x), List(x)).
 	
 ////////////Syntax///////////////////////////////
 	programOk(Program(defs, block)) :- {s}
@@ -183,9 +189,7 @@ rules
 	cexprOk(s, e@Plus(ec1,ec2)) = T :- {T1 T2}
 		cexprOk(s, ec1) == T1,
 		cexprOk(s, ec2) == T2,
-		T1 != Bool(),
-		T2 != Bool(),
-		T1 == T2 | error $[for additions types [T1] and [T2] need to match],
+		canAdd(T1, T2) | error $[for additions types [T1] and [T2] need to match],
 		T == T1,
 		@e.type := T.
 
@@ -270,10 +274,10 @@ rules
 		T == EmptyList(),
 		@e.type := T.
 
-//TODO fix this we need all the elements of the list to be the same
+//TODO fix this we need all the elements of the list to be the same??
 	cexprOk(s, e@ListLit(x)) = T :-  {n}
-		[n, _] == x,
-		T == exprOk(s, n),
+		x == [n | _],
+		T == exprOk(s, n) | error $[all elements of the list need to be the same?],
 		@e.type := T.
 
 
