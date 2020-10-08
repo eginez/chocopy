@@ -134,7 +134,8 @@ rules
 			in s |-> ps.
 
 	typeOfVar(s, TypedVar(x, t)) = T :- {x'}
-		resolveVar(s, x) == [(_,(x', T))].
+		resolveVar(s, x) == [(_,(x', T))],
+		@x.ref := x'.
 	
 		
 	varDefOk(s, e@VarDef(tv, l)) = T :- {T1 T2}
