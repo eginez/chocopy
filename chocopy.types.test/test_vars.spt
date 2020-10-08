@@ -22,3 +22,18 @@ a: int = "0"
 test simple list [[
 a: [int] = None
 ]] analysis succeeds
+
+test var assign [[
+a: int = 0
+a = 1
+]] analysis succeeds
+
+test resoluton correct [[
+[[a]]: int = 0
+[[a]] = 1
+]] resolve #2 to #1
+
+test var assign bad type [[
+a: int = 0
+a = "asdf"
+]] analysis fails

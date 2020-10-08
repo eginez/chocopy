@@ -40,7 +40,9 @@ rules
   stmtOk: scope * Stmt
   stmtsOk maps stmtOk(*, list(*))
   
+//Statements & Targets
   simpleStmtOk: scope * SimpleStmt
+  targetOk: scope * Target -> TYPE
 
 
 //Expressions
@@ -60,6 +62,7 @@ rules
 	declareVar: scope * TypedVar -> TYPE
 	typedVarToID: scope * TypedVar -> ID
 	typeOfVar: scope * TypedVar -> TYPE
+	typeOfVarID: scope *ID -> TYPE
 	resolveVar: scope * ID -> list((path * (ID * TYPE)))
 	typeOfType: scope * Type -> TYPE
 
@@ -102,11 +105,24 @@ rules
 	blockOk(s, Block(ls)) :-
 		stmtsOk(s, ls).
 		
+////////////Statements///////////////////////////////
 	stmtOk(s, SimpleStmt(simple)) :-
 		simpleStmtOk(s, simple).
 	
 	simpleStmtOk(s, Expression(expr)) :- {T}
 		exprOk(s, expr) == T.
+
+	simpleStmtOk(s, TargetSimpleStmt(trgt, exp)) :- {T1 T2}
+		targetOk(s, trgt) == T1 | error $[[trgt] was expected to be declared, missing a declaration?],
+		exprOk(s, exp) == T2,
+		T1 == T2 | error $[The type of the target [T1] needs to match the type of the expr [T2]].
+
+////////////Targets///////////////////////////////
+/// Here we check vars have been declared
+	targetOk(s, Identifier(x)) = T :- {x'}
+		typeOfVarID(s, x) == T.
+
+
 
 ////////////VarDef///////////////////////////////
 
@@ -134,6 +150,10 @@ rules
 			in s |-> ps.
 
 	typeOfVar(s, TypedVar(x, t)) = T :- {x'}
+		typeOfVarID(s, x) == T,
+		@x.ref := x'.
+
+	typeOfVarID(s, x) = T :- {x'}
 		resolveVar(s, x) == [(_,(x', T))],
 		@x.ref := x'.
 	
