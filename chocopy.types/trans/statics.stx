@@ -49,7 +49,7 @@ rules
   exprOk: scope * Expr -> TYPE
   cexprOk: scope * ExprConstant -> TYPE
   literalOk: scope * Literal -> TYPE
-  indexExprOk: scope * IndexExpr
+  indexExprOk: scope * IndexExpr -> TYPE
  
  
   blockOk: scope * Block
@@ -109,6 +109,11 @@ rules
 	stmtOk(s, SimpleStmt(simple)) :-
 		simpleStmtOk(s, simple).
 	
+	simpleStmtOk(s, Pass()) :- true.
+
+	simpleStmtOk(s, RetSimpleStmt(expr)) :- {T}
+		exprOk(s, expr) == T.
+
 	simpleStmtOk(s, Expression(expr)) :- {T}
 		exprOk(s, expr) == T.
 
@@ -119,8 +124,13 @@ rules
 
 ////////////Targets///////////////////////////////
 /// Here we check vars have been declared
-	targetOk(s, Identifier(x)) = T :- {x'}
-		typeOfVarID(s, x) == T.
+	targetOk(s, Identifier(x)) = T :- 
+		typeOfVarID(s, x) == T | error $[can not find the declartion of identifier [x]].
+
+	targetOk(s, TargetIndex(x)) = T :- {nameExpr indxExpr}
+		indexExprOk(s, x) == T.
+
+////TODO MemberExpr and IndexExpr
 
 
 
@@ -207,6 +217,10 @@ rules
 		
 		
 ////////////Constant Expressions///////////////////////////////
+
+	cexprOk(s, e@VarId(id)) = T :-
+		typeOfVarID(s, id) == T | error $[[id] can not be resolved],
+		@e.type := T.
 
 	cexprOk(s, e@Plus(ec1,ec2)) = T :- {T1 T2}
 		cexprOk(s, ec1) == T1,
@@ -303,9 +317,10 @@ rules
 		@e.type := T.
 		
 	cexprOk(s, e@Index(x)) = T :-  
-		indexExprOk(s, x).
+		indexExprOk(s, x) == T.
 	
-	indexExprOk(s, IndexExpr(name, idx)) :-
+	indexExprOk(s, IndexExpr(name, idx)) = T :-
+		cexprOk(s, name) == T | error $[[name] is not a valid expression],
 		exprOk(s, idx) == Int() | error $[index must be of type int in expr $[idx]].
 
 

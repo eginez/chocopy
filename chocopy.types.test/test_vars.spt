@@ -37,3 +37,13 @@ test var assign bad type [[
 a: int = 0
 a = "asdf"
 ]] analysis fails
+
+test list access [[
+a: [int] = None
+a[1]
+]] analysis succeeds
+
+test bad list access [[
+a: [int] = None
+a["asd"]
+]] analysis fails
