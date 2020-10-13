@@ -43,6 +43,14 @@ rules
   
   stmtOk: scope * Stmt
   stmtsOk maps stmtOk(*, list(*))
+
+  ifBlkOk: scope * IfBlock
+
+  elifBlkOk: scope * ElifBlock
+  elifBlksOk maps elifBlkOk(*, list(*))
+
+  elseBlkOk: scope * ElseBlock
+  elseBlksOk maps elseBlkOk(*, list(*))
   
 //Statements & Targets
   simpleStmtOk: scope * SimpleStmt
@@ -122,6 +130,23 @@ rules
 
 	stmtOk(s, While(expr, blk)) :-
 		exprOk(s, expr) == Bool(),
+		blockOk(s, blk).
+		
+	///// If statmements ////////
+	stmtOk(s, StmtIf(ifBlk, elifBlk, elseBlk)) :-
+		ifBlkOk(s, ifBlk),
+		elifBlksOk(s, elifBlk),
+		elseBlksOk(s, elseBlk).
+	
+	ifBlkOk(s, IfBlock(expr, blk)) :-
+		exprOk(s, expr) == Bool() | error $[[expr] needs to be a bool],
+		blockOk(s, blk).
+
+	elifBlkOk(s, ElifBlock(expr, blk)) :-
+		exprOk(s, expr) == Bool() | error $[[expr] needs to be a bool],
+		blockOk(s, blk).
+
+	elseBlkOk(s, ElseBlock(blk)) :-
 		blockOk(s, blk).
 		
 		
