@@ -1,6 +1,15 @@
 Program(
-  [VarDefinition(VarDef(TypedVar("a", TypeID("int")), Integer("1")))]
+  [ VarDefinition(VarDef(TypedVar("a", TypeID("int")), Integer("0")))
+  , VarDefinition(VarDef(TypedVar("b", CollectionType(TypeID("int"))), None()))
+  ]
 , Block(
-    [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))]
+    [ For(
+        "a"
+      , Constant(VarId("b"))
+      , Block(
+          [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("1")))))]
+        )
+      )
+    ]
   )
 )

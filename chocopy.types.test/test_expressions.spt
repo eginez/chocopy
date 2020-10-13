@@ -1,0 +1,35 @@
+module test
+
+language chocopy
+start symbol Program
+
+test decls [[
+a: int = 1
+b: [int] = None
+b = [1,2]
+]] analysis succeeds
+
+test expr for [[
+a: int = 0
+for a in [2,3]:
+    a = 1
+]] analysis succeeds
+
+test expr for 2 [[
+a: int = 0
+b: [int] = None
+for a in b:
+    a = 1
+]] analysis succeeds
+
+test bad expr for [[
+a: bool = 0
+for a in [2,3]:
+    a = 1
+]] analysis fails
+
+test bad expr for [[
+for a in [2,3]:
+    a = 1
+]] analysis fails
+

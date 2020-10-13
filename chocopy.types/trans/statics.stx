@@ -31,6 +31,10 @@ signature
   relations
   	var : ID -> TYPE
 
+ name-resolution
+ 	labels P
+ 
+
 rules // single-file entry point
 
 	programOk : Program
@@ -94,11 +98,13 @@ rules
 ////////////Syntax///////////////////////////////
 	programOk(Program(defs, block)) :- {s}
 		new s, //TODO fix this
+		s -P-> s,
 		defsOk(s, defs),
 		blockOk(s, block).
 
 	programOk(ProgramOne(defs)) :- {s}
 		new s, //TODO fix this
+		s -P-> s,
 		defsOk(s, defs).
 
 
@@ -108,6 +114,17 @@ rules
 ////////////Statements///////////////////////////////
 	stmtOk(s, SimpleStmt(simple)) :-
 		simpleStmtOk(s, simple).
+
+	stmtOk(s, For(id, expr, blk)) :- {T1}
+		typeOfVarID(s, id) == T1 | error $[can not resolve [id]],
+		exprOk(s, expr) == List(T1) | error $[[expr] neesds to be [List(T1)]],
+		blockOk(s, blk).
+
+	stmtOk(s, While(expr, blk)) :-
+		exprOk(s, expr) == Bool(),
+		blockOk(s, blk).
+		
+		
 	
 	simpleStmtOk(s, Pass()) :- true.
 
@@ -155,8 +172,8 @@ rules
 
 	resolveVar(s, x) = ps :-
 		query var
-			filter e and {x' :- x' == x}
-			min and true
+			filter P* and {x' :- x' == x}
+			min $ < P and true
 			in s |-> ps.
 
 	typeOfVar(s, TypedVar(x, t)) = T :- {x'}
@@ -311,10 +328,10 @@ rules
 		@e.type := T.
 
 //TODO fix this we need all the elements of the list to be the same??
-	cexprOk(s, e@ListLit(x)) = T :-  {n}
+	cexprOk(s, e@ListLit(x)) = List(T) :-  {n}
 		x == [n | _],
-		T == exprOk(s, n) | error $[all elements of the list need to be the same?],
-		@e.type := T.
+		exprOk(s, n) == T | error $[all elements of the list need to be the same?],
+		@e.type := List(T).
 		
 	cexprOk(s, e@Index(x)) = T :-  
 		indexExprOk(s, x) == T.
