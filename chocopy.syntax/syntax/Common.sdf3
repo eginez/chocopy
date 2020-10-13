@@ -1,0 +1,105 @@
+module Common
+
+lexical sorts
+  ID 
+  INT 
+  STRING
+  STRING_CHAR 
+  BACKSLASH_CHAR
+  COMMENT_CHAR 
+  PHYSICAL_LINE 
+  NEWLINE_EOF
+  NEWLINE
+  EOF 
+
+lexical syntax
+
+  PHYSICAL_LINE	 	= [\n\r]
+  NEWLINE_EOF      	= PHYSICAL_LINE
+  NEWLINE_EOF      	= EOF
+  EOF              	=
+
+  ID               	= [a-zA-Z\_] [a-zA-Z0-9\_]*
+  ID				= Keyword {reject}
+  BOOLEAN_LIT		= "True"
+  BOOLEAN_LIT		= "False"
+
+  INT              = "-"? [0-9]+
+
+  BACKSLASH_CHAR   = "\\"
+  STRING_CHAR      = ~[\"\n]
+  STRING_CHAR      = "\\\""
+  STRING_CHAR      = BACKSLASH_CHAR
+  STRING           = "\"" STRING_CHAR* "\""
+
+  LAYOUT           = [\ \t\n\r]
+ // LAYOUT           = [\ \t]
+  
+  COMMENT_CHAR     = "#"
+
+  LAYOUT           = "#" ~[\n\r]* NEWLINE_EOF
+
+
+
+lexical restrictions
+
+  // Ensure greedy matching for lexicals
+  
+  COMMENT_CHAR    -/- [\#]
+  INT             -/- [0-9]
+  ID              -/- [a-zA-Z0-9\_]
+  
+  // EOF may not be followed by any char
+  
+  EOF             -/- ~[]
+  
+  // Backslash chars in strings may not be followed by " 
+  
+  BACKSLASH_CHAR  -/- [\"]
+
+context-free restrictions
+
+  // Ensure greedy matching for comments
+  
+  LAYOUT? -/- [\ \t\n\r]
+  //LAYOUT? -/- [\ \t]
+  LAYOUT? -/- [\#]
+  
+  
+// Keywords
+lexical syntax
+	Keyword = "False"
+    Keyword = "True"
+	Keyword = "None"
+    Keyword = "and"
+    Keyword = "as"
+    Keyword = "assert"
+    Keyword = "async"
+    Keyword = "await"
+    Keyword = "break"
+    Keyword = "class"
+    Keyword = "continue"
+    Keyword = "def"
+    Keyword = "del"
+    Keyword = "elif"
+    Keyword = "else"
+    Keyword = "except"
+    Keyword = "finally"
+    Keyword = "for"
+    Keyword = "from"
+    Keyword = "global"
+    Keyword = "if"
+    Keyword = "import"
+    Keyword = "in"
+    Keyword = "is"
+    Keyword = "lambda"
+    Keyword = "nonlocal"
+    Keyword = "not"
+    Keyword = "or"
+    Keyword = "pass"
+    Keyword = "raise"
+    Keyword = "return"
+    Keyword = "try"
+    Keyword = "while"
+    Keyword = "with"
+    Keyword = "yield"

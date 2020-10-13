@@ -1,0 +1,839 @@
+Module(
+  Unparameterized("chocopy")
+, [Imports([Module(Unparameterized("Common"))])]
+, [ SDFSection(ContextFreeStartSymbols([Sort("Program")]))
+  , SDFSection(
+      CfSorts(
+        [ "Exp"
+        , "Def"
+        , "Stmt"
+        , "SimpleStmt"
+        , "Target"
+        , "Declaration"
+        , "TypedVar"
+        , "TypedVarList"
+        , "Type"
+        , "Expr"
+        , "ExprConstant"
+        , "MemberExpr"
+        , "IndexExpr"
+        , "Operator"
+        , "Literal"
+        , "Program"
+        , "Block"
+        , "IfBlock"
+        , "ElseIfBlock"
+        , "ElifBlock"
+        , "ElseBlock"
+        , "VarDef"
+        , "FunctionDeclarations"
+        , "FunctionDef"
+        , "FunctionBody"
+        , "AllDefinitions"
+        , "ClassDef"
+        , "ClassBody"
+        ]
+      )
+    )
+  , SDFSection(
+      ContextFreeSyntax(
+        [ TemplateProductionWithCons(
+            SortCons(SortDef("Program"), Constructor("Program"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(IterStar(Sort("AllDefinitions")), NoOptions()))
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Block"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Program"), Constructor("ProgramOne"))
+          , Template(
+              [Line([Angled(Placeholder(IterStar(Sort("AllDefinitions")), NoOptions()))])]
+            )
+          , Attrs([Prefer()])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("AllDefinitions"), Constructor("FunctionDefinition"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("FunctionDef"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("AllDefinitions"), Constructor("VarDefinition"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("VarDef"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("AllDefinitions"), Constructor("ClassDefinition"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("ClassDef"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("FunctionDef"), Constructor("FnDef"))
+          , Rhs(
+              [ Lit("\"def\"")
+              , Sort("ID")
+              , Lit("\"(\"")
+              , Sort("TypedVarList")
+              , Lit("\")\"")
+              , Lit("\"->\"")
+              , Sort("Type")
+              , Lit("\":\"")
+              , Label(Unquoted("fnBody"), Sort("FunctionBody"))
+              ]
+            )
+          , Attrs(
+              [LayoutConstraint(NewLineIndent(LiteralRef("\"def\""), [LabelRef("fnBody")]))]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("FunctionBody"), Constructor("FnBody"))
+          , Rhs(
+              [ Label(Unquoted("fnDecl"), IterStar(Sort("FunctionDeclarations")))
+              , Label(Unquoted("fnStmt"), Sort("Block"))
+              ]
+            )
+          , Attrs(
+              [LayoutConstraint(Align(LabelRef("fnDecl"), [LabelRef("fnStmt")]))]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ClassDef"), Constructor("ClsDef"))
+          , Rhs(
+              [ Lit("\"class\"")
+              , Sort("ID")
+              , Lit("\"(\"")
+              , Sort("ID")
+              , Lit("\")\"")
+              , Lit("\":\"")
+              , Label(Unquoted("clsBody"), Sort("ClassBody"))
+              ]
+            )
+          , Attrs(
+              [LayoutConstraint(NewLineIndent(LiteralRef("\"class\""), [LabelRef("clsBody")]))]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ClassBody"), Constructor("ClsBodyEmpty"))
+          , Rhs([Lit("\"pass\"")])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ClassBody"), Constructor("ClsBody"))
+          , Rhs([IterStar(Sort("VarDef")), Iter(Sort("FunctionDef"))])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ClassBody"), Constructor("ClsBodyVars"))
+          , Rhs([Label(Unquoted("defs"), Iter(Sort("VarDef")))])
+          , Attrs([LongestMatch(), Prefer(), LayoutConstraint(Align(LabelRef("defs")))])
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("Block"), Constructor("Block"))
+          , Rhs([Label(Unquoted("sts"), Iter(Sort("Stmt")))])
+          , Attrs([LongestMatch(), LayoutConstraint(Align(LabelRef("sts")))])
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("IfBlock"), Constructor("IfBlock"))
+          , Rhs(
+              [ Lit("\"if\"")
+              , Sort("Expr")
+              , Lit("\":\"")
+              , Label(Unquoted("blk"), Sort("Block"))
+              ]
+            )
+          , Attrs(
+              [LayoutConstraint(NewLineIndent(LiteralRef("\"if\""), [LabelRef("blk")]))]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ElseBlock"), Constructor("ElseBlock"))
+          , Rhs(
+              [Lit("\"else:\""), Label(Unquoted("blk"), Sort("Block"))]
+            )
+          , Attrs(
+              [LayoutConstraint(NewLineIndent(LiteralRef("\"else:\""), [LabelRef("blk")]))]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ElifBlock"), Constructor("ElifBlock"))
+          , Rhs(
+              [ Lit("\"elif\"")
+              , Sort("Expr")
+              , Lit("\":\"")
+              , Label(Unquoted("blk"), Sort("Block"))
+              ]
+            )
+          , Attrs(
+              [LayoutConstraint(NewLineIndent(LiteralRef("\"elif\""), [LabelRef("blk")]))]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("Stmt"), Constructor("StmtIf"))
+          , Rhs(
+              [ Label(Unquoted("ifBlk"), Sort("IfBlock"))
+              , Label(Unquoted("elifBlk"), IterStar(Sort("ElifBlock")))
+              , Label(Unquoted("elseBlk"), Opt(Sort("ElseBlock")))
+              ]
+            )
+          , Attrs(
+              [ LayoutConstraint(
+                  And(
+                    Align(LabelRef("ifBlk"), [LabelRef("elifBlk")])
+                  , Align(LabelRef("ifBlk"), [LabelRef("elseBlk")])
+                  )
+                )
+              ]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("Stmt"), Constructor("While"))
+          , Rhs(
+              [ Lit("\"while\"")
+              , Sort("Expr")
+              , Lit("\":\"")
+              , Label(Unquoted("blk"), Sort("Block"))
+              ]
+            )
+          , Attrs(
+              [LayoutConstraint(NewLineIndent(LiteralRef("\"while\""), [LabelRef("blk")]))]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("Stmt"), Constructor("For"))
+          , Rhs(
+              [ Lit("\"for\"")
+              , Sort("ID")
+              , Lit("\"in\"")
+              , Sort("Expr")
+              , Lit("\":\"")
+              , Label(Unquoted("blk"), Sort("Block"))
+              ]
+            )
+          , Attrs(
+              [LayoutConstraint(NewLineIndent(LiteralRef("\"for\""), [LabelRef("blk")]))]
+            )
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Stmt"), Constructor("SimpleStmt"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("SimpleStmt"), NoOptions()))])]
+            )
+          , Attrs(
+              [ LayoutConstraint(
+                  Eq(
+                    Line(First(Tree("1")))
+                  , Line(Last(Tree("1")))
+                  )
+                )
+              ]
+            )
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("SimpleStmt"), Constructor("Pass"))
+          , Rhs([Lit("\"pass\"")])
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("SimpleStmt"), Constructor("Expression"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("Expr"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("SimpleStmt"), Constructor("RetSimpleStmt"))
+          , Template(
+              [ Line(
+                  [String("return"), Layout(" "), Angled(Placeholder(Sort("Expr"), NoOptions()))]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("SimpleStmt"), Constructor("TargetSimpleStmt"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("Target"), NoOptions()))
+                  , Layout(" ")
+                  , String("=")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Target"), Constructor("Identifier"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("ID"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Target"), Constructor("TargetMember"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("MemberExpr"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Target"), Constructor("TargetIndex"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("IndexExpr"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Type"), Constructor("TypeID"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("ID"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Type"), Constructor("TypeString"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("STRING"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Type"), Constructor("CollectionType"))
+          , Template(
+              [ Line(
+                  [String("["), Angled(Placeholder(Sort("Type"), NoOptions())), String("]")]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("TypedVar"), Constructor("TypedVar"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ID"), NoOptions()))
+                  , Layout(" ")
+                  , String(":")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Type"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("TypedVarList"), Constructor("TypedVarList"))
+          , Template(
+              [ Line(
+                  [Angled(Placeholder(IterStarSep(Sort("TypedVar"), Lit("\",\"")), NoOptions()))]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Declaration"), Constructor("Global"))
+          , Template(
+              [ Line(
+                  [String("global"), Layout(" "), Angled(Placeholder(Sort("ID"), NoOptions()))]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Declaration"), Constructor("NonLocal"))
+          , Template(
+              [ Line(
+                  [String("nonlocal"), Layout(" "), Angled(Placeholder(Sort("ID"), NoOptions()))]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("FunctionDeclarations"), Constructor("FnLocalGlobals"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("Declaration"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("FunctionDeclarations"), Constructor("FnVarDef"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("VarDef"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("FunctionDeclarations"), Constructor("FnFnDef"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("FunctionDef"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("VarDef"), Constructor("VarDef"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("TypedVar"), NoOptions()))
+                  , Layout(" ")
+                  , String("=")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Literal"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProduction(
+            SortDef("Expr")
+          , Template(
+              [ Line(
+                  [String("("), Angled(Placeholder(Sort("Expr"), NoOptions())), String(")")]
+                )
+              ]
+            )
+          , Attrs([Bracket()])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Expr"), Constructor("Not"))
+          , Template(
+              [ Line(
+                  [String("not"), Layout(" "), Angled(Placeholder(Sort("Expr"), NoOptions()))]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Expr"), Constructor("And"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  , Layout(" ")
+                  , String("and")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Left())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Expr"), Constructor("Or"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  , Layout(" ")
+                  , String("or")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Left())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Expr"), Constructor("IfElse"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  , Layout(" ")
+                  , String("if")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  , Layout(" ")
+                  , String("else")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Right())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Expr"), Constructor("Constant"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("ExprConstant"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("VarId"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("ID"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("ExprLit"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("Literal"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("ListLit"))
+          , Template(
+              [ Line(
+                  [ String("[")
+                  , Angled(Placeholder(IterStarSep(Sort("Expr"), Lit("\", \"")), NoOptions()))
+                  , String("]")
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("ParenLit"))
+          , Template(
+              [ Line(
+                  [String("("), Angled(Placeholder(Sort("ExprConstant"), NoOptions())), String(")")]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Index"))
+          , Rhs([Sort("IndexExpr")])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Member"))
+          , Rhs([Sort("MemberExpr")])
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("MemberCall"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("MemberExpr"), NoOptions()))
+                  , String("(")
+                  , Angled(Placeholder(IterStarSep(Sort("Expr"), Lit("\",\"")), NoOptions()))
+                  , String(")")
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("FuncCall"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ID"), NoOptions()))
+                  , String("(")
+                  , Angled(Placeholder(IterStarSep(Sort("Expr"), Lit("\",\"")), NoOptions()))
+                  , String(")")
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Plus"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("+")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Left())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Minus"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("-")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Left())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Times"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("*")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Left())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Div"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("//")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Left())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Mod"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("%")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(Left())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Eq"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("==")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(NonAssoc())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("NotEq"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("!=")
+                  , Layout(" ")
+                  , Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(NonAssoc())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("GtEq"))
+          , TemplateSquare(
+              [ Line(
+                  [ Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String(">=")
+                  , Layout(" ")
+                  , Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(NonAssoc())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Gt"))
+          , TemplateSquare(
+              [ Line(
+                  [ Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String(">")
+                  , Layout(" ")
+                  , Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(NonAssoc())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("LtEq"))
+          , TemplateSquare(
+              [ Line(
+                  [ Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("<=")
+                  , Layout(" ")
+                  , Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(NonAssoc())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Lt"))
+          , TemplateSquare(
+              [ Line(
+                  [ Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("<")
+                  , Layout(" ")
+                  , Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(NonAssoc())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("ExprConstant"), Constructor("Is"))
+          , TemplateSquare(
+              [ Line(
+                  [ Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , Layout(" ")
+                  , String("is")
+                  , Layout(" ")
+                  , Squared(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , Attrs([Assoc(NonAssoc())])
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("MemberExpr"), Constructor("MemberExpr"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , String(".")
+                  , Angled(Placeholder(Sort("ID"), NoOptions()))
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("IndexExpr"), Constructor("IndexExpr"))
+          , Template(
+              [ Line(
+                  [ Angled(Placeholder(Sort("ExprConstant"), NoOptions()))
+                  , String("[")
+                  , Angled(Placeholder(Sort("Expr"), NoOptions()))
+                  , String("]")
+                  ]
+                )
+              ]
+            )
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("Literal"), Constructor("None"))
+          , Rhs([Lit("\"None\"")])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("Literal"), Constructor("LitTrue"))
+          , Rhs([Lit("\"True\"")])
+          , NoAttrs()
+          )
+        , SdfProductionWithCons(
+            SortCons(SortDef("Literal"), Constructor("LitFalse"))
+          , Rhs([Lit("\"False\"")])
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Literal"), Constructor("Integer"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("INT"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        , TemplateProductionWithCons(
+            SortCons(SortDef("Literal"), Constructor("String"))
+          , Template(
+              [Line([Angled(Placeholder(Sort("STRING"), NoOptions()))])]
+            )
+          , NoAttrs()
+          )
+        ]
+      )
+    )
+  , SDFSection(
+      ContextFreePriorities(
+        [ Chain(
+            [ AssocRefGroup(
+                Left()
+              , [ SortConsRef(Sort("ExprConstant"), Constructor("Index"))
+                , SortConsRef(Sort("IndexExpr"), Constructor("IndexExpr"))
+                , SortConsRef(Sort("MemberExpr"), Constructor("MemberExpr"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("Member"))
+                ]
+              )
+            , AssocRefGroup(
+                Left()
+              , [ SortConsRef(Sort("ExprConstant"), Constructor("Div"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("Times"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("Mod"))
+                ]
+              )
+            , AssocRefGroup(
+                Left()
+              , [ SortConsRef(Sort("ExprConstant"), Constructor("Plus"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("Minus"))
+                ]
+              )
+            , ProdsRefGroup(
+                [ SortConsRef(Sort("ExprConstant"), Constructor("Eq"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("NotEq"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("GtEq"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("Gt"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("Lt"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("LtEq"))
+                , SortConsRef(Sort("ExprConstant"), Constructor("Is"))
+                ]
+              )
+            , AssocRefGroup(Left(), [SortConsRef(Sort("Expr"), Constructor("Not"))])
+            , AssocRefGroup(Left(), [SortConsRef(Sort("Expr"), Constructor("And"))])
+            , AssocRefGroup(Left(), [SortConsRef(Sort("Expr"), Constructor("Or"))])
+            , ProdsRefGroup([SortConsRef(Sort("Expr"), Constructor("IfElse"))])
+            ]
+          )
+        ]
+      )
+    )
+  ]
+)

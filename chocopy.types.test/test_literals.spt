@@ -1,0 +1,113 @@
+module test
+
+language chocopy
+start symbol Program
+
+test lit1 [[
+[[2]] + 1 
+]] run get-type on #1 to Int()
+
+
+test lit2 [[
+[[True]] == True
+]] run get-type on #1 to Bool()
+
+test lit string [[
+[["asdf"]] == "asdf"
+]] run get-type on #1 to String()
+
+test lit none [[
+[[None]] == None
+]] run get-type on #1 to NoneType()
+
+test lit3 [[
+True
+]] analysis succeeds
+
+test lit4 [[
+None
+]] analysis succeeds
+
+test plus [[
+2 + 3
+]] analysis succeeds
+
+test plus string [[
+"asdb" + "asd"
+]] analysis succeeds
+
+test bad plus [[
+2 + True
+]] analysis fails
+
+test bad plus bool [[
+True + True
+]] analysis fails
+
+test minus [[
+2 - 3
+]] analysis succeeds
+
+test minus bool [[
+True - 3
+]] analysis fails
+
+test minus string [[
+"asdf" - "asdf"
+]] analysis fails
+
+test times  [[
+-234 * 43
+]] analysis succeeds
+
+test div  [[
+-234 // 43
+]] analysis succeeds
+
+test bad times bool  [[
+-234 * True
+]] analysis fails
+
+test bad mod string  [[
+-234 % "asdf"
+]] analysis fails
+
+test gt eq int [[
+2 >= 3
+]] analysis succeeds
+
+test bad gt eq string [[
+2 > "ha"
+]] analysis fails
+
+test is [[
+"is" is "ha"
+]] analysis fails
+
+test is int [[
+2 is 2
+]] analysis fails
+
+test bad is boolean [[
+2 is False
+]] analysis fails
+
+test empty list [[
+[]
+]] analysis succeeds
+
+test list of one [[
+[1]
+]] analysis succeeds
+
+test list of many [[
+[1, 2, 3]
+]] analysis succeeds
+
+test list concat [[
+[1, 2, 3] + [1]
+]] analysis succeeds
+
+test list concat bad [[
+[1, 2, 3] +  ["asd"]
+]] analysis fails

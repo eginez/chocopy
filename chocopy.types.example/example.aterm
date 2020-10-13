@@ -1,0 +1,6 @@
+Program(
+  [VarDefinition(VarDef(TypedVar("a", TypeID("int")), Integer("1")))]
+, Block(
+    [SimpleStmt(TargetSimpleStmt(Identifier("a"), Constant(ExprLit(Integer("2")))))]
+  )
+)

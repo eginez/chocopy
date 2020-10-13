@@ -1,0 +1,342 @@
+module statics
+imports signatures/chocopy-sig
+
+// We expect to get these types in the grading pipeline
+// you are free to use your own (custom) types in your Statix file
+// as long as you write transformation rules from your types to our types
+// in resolve-type
+signature
+  sorts
+  	TYPE
+
+  constructors
+    Int : TYPE
+    Bool : TYPE
+    String : TYPE
+    ClassType : ID -> TYPE
+    List : TYPE -> TYPE
+    NoneType : TYPE
+    EmptyList : TYPE
+	Object : TYPE
+
+// Here you can define the signature of the types you have used in your Statix definiions.
+// This is just an example on how to do it.
+// signature 
+//   sorts
+//     MyCustomType
+//
+//  constructors
+//    MyCustomIntType : MyCustomType
+
+  relations
+  	var : ID -> TYPE
+
+rules // single-file entry point
+
+	programOk : Program
+    
+rules
+  
+  stmtOk: scope * Stmt
+  stmtsOk maps stmtOk(*, list(*))
+  
+//Statements & Targets
+  simpleStmtOk: scope * SimpleStmt
+  targetOk: scope * Target -> TYPE
+
+
+//Expressions
+  exprOk: scope * Expr -> TYPE
+  cexprOk: scope * ExprConstant -> TYPE
+  literalOk: scope * Literal -> TYPE
+  indexExprOk: scope * IndexExpr -> TYPE
+ 
+ 
+  blockOk: scope * Block
+
+//Definitions
+	defOk: scope * AllDefinitions
+	defsOk maps defOk(*, list(*))
+
+	varDefOk: scope * VarDef -> TYPE
+	declareVar: scope * TypedVar -> TYPE
+	typedVarToID: scope * TypedVar -> ID
+	typeOfVar: scope * TypedVar -> TYPE
+	typeOfVarID: scope *ID -> TYPE
+	resolveVar: scope * ID -> list((path * (ID * TYPE)))
+	typeOfType: scope * Type -> TYPE
+
+//Utils
+	notSimpleType: TYPE
+	sameTypes: TYPE * TYPE
+	canAdd: TYPE * TYPE
+  
+  
+  
+
+
+  
+rules
+
+
+////////////Utils///////////////////////////////
+	notSimpleType(Int()) :- false.
+	notSimpleType(String()) :- false.
+	notSimpleType(Bool()) :- false.
+
+	sameTypes(x, x) :- true.
+	sameTypes(List(x), NoneType) :- true.
+
+	canAdd(Int(), Int()).
+	canAdd(String(), String()).
+	canAdd(List(x), List(x)).
+	
+////////////Syntax///////////////////////////////
+	programOk(Program(defs, block)) :- {s}
+		new s, //TODO fix this
+		defsOk(s, defs),
+		blockOk(s, block).
+
+	programOk(ProgramOne(defs)) :- {s}
+		new s, //TODO fix this
+		defsOk(s, defs).
+
+
+	blockOk(s, Block(ls)) :-
+		stmtsOk(s, ls).
+		
+////////////Statements///////////////////////////////
+	stmtOk(s, SimpleStmt(simple)) :-
+		simpleStmtOk(s, simple).
+	
+	simpleStmtOk(s, Pass()) :- true.
+
+	simpleStmtOk(s, RetSimpleStmt(expr)) :- {T}
+		exprOk(s, expr) == T.
+
+	simpleStmtOk(s, Expression(expr)) :- {T}
+		exprOk(s, expr) == T.
+
+	simpleStmtOk(s, TargetSimpleStmt(trgt, exp)) :- {T1 T2}
+		targetOk(s, trgt) == T1 | error $[[trgt] was expected to be declared, missing a declaration?],
+		exprOk(s, exp) == T2,
+		T1 == T2 | error $[The type of the target [T1] needs to match the type of the expr [T2]].
+
+////////////Targets///////////////////////////////
+/// Here we check vars have been declared
+	targetOk(s, Identifier(x)) = T :- 
+		typeOfVarID(s, x) == T | error $[can not find the declartion of identifier [x]].
+
+	targetOk(s, TargetIndex(x)) = T :- {nameExpr indxExpr}
+		indexExprOk(s, x) == T.
+
+////TODO MemberExpr and IndexExpr
+
+
+
+////////////VarDef///////////////////////////////
+
+	typeOfType(s, e@TypeID("int")) = Int().
+	typeOfType(s, e@TypeID("str")) = String().
+	typeOfType(s, e@TypeID("bool")) = Bool().
+	typeOfType(s, e@TypeID(x)) = Object().
+	typeOfType(s, e@CollectionType(x)) = T :- {T1}
+		typeOfType(s, x) == T1,
+		T == List(T1),
+		@e.type := List(T1).
+		
+
+
+	declareVar(s, e@TypedVar(id, t)) = T :-
+		typeOfType(s, t) == T,
+		!var[id, T] in s,
+		@e.type := T.
+		
+
+	resolveVar(s, x) = ps :-
+		query var
+			filter e and {x' :- x' == x}
+			min and true
+			in s |-> ps.
+
+	typeOfVar(s, TypedVar(x, t)) = T :- {x'}
+		typeOfVarID(s, x) == T,
+		@x.ref := x'.
+
+	typeOfVarID(s, x) = T :- {x'}
+		resolveVar(s, x) == [(_,(x', T))],
+		@x.ref := x'.
+	
+		
+	varDefOk(s, e@VarDef(tv, l)) = T :- {T1 T2}
+		declareVar(s, tv) == T1,
+		literalOk(s, l) == T2,
+		sameTypes(T1, T2) | error $[the type of the var [T1] does not match the literal type [T2]],
+		T1 == T,
+		@e.type := T.
+
+
+		
+	defOk(s, e@VarDefinition(x)) :- {T}
+		varDefOk(s, x) == T.
+
+	
+////////////Expressions///////////////////////////////
+
+	exprOk(s, e@Not(expr1)) = T :- {T1}
+		exprOk(s, expr1) == T1,
+		T1 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		@e.type := Bool().
+	
+	exprOk(s, e@And(expr1, expr2)) = T :- {T1 T2}
+		exprOk(s, expr1) == T1,
+		exprOk(s, expr2) == T2,
+		T1 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		T2 == Bool()| error $[or requires a boolean type on the LHS for [T2]],
+		@e.type := Bool().
+
+	exprOk(s, e@Or(expr1, expr2)) = T :- {T1 T2}
+		exprOk(s, expr1) == T1,
+		exprOk(s, expr2) == T2,
+		T1 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		T2 == Bool()| error $[or requires a boolean type on the LHS for [T2]],
+		@e.type := Bool().
+
+	exprOk(s, e@IfElse(expr1, expr2, expr3)) = T :- {T1 T2 T3}
+		exprOk(s, expr1) == T1,
+		exprOk(s, expr2) == T2,
+		exprOk(s, expr3) == T3,
+		T2 == Bool()| error $[or requires a boolean type on the LHS for [T1]],
+		@e.type := Bool().
+
+
+
+	exprOk(s, e@Constant(cexpr)) = T :-
+		cexprOk(s, cexpr) == T,
+		@e.type := T.
+		
+		
+////////////Constant Expressions///////////////////////////////
+
+	cexprOk(s, e@VarId(id)) = T :-
+		typeOfVarID(s, id) == T | error $[[id] can not be resolved],
+		@e.type := T.
+
+	cexprOk(s, e@Plus(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		canAdd(T1, T2) | error $[for additions types [T1] and [T2] need to match],
+		T == T1,
+		@e.type := T.
+
+	cexprOk(s, e@Times(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for mult types the type of [ec1] needs to be int],
+		T2 == Int() | error $[for mult types the type of [ec2] needs to be int],
+		@e.type := Int().
+
+	cexprOk(s, e@Div(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for division types the type of [ec1] needs to be int],
+		T2 == Int() | error $[for division types the type of [ec2] needs to be int],
+		@e.type := Int().
+
+	cexprOk(s, e@Mod(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for modulus types the type of [ec1] needs to be int],
+		T2 == Int() | error $[for modulus types the type of [ec2] needs to be int],
+		@e.type := Int().
+
+	cexprOk(s, e@Minus(ec1,ec2)) = T :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == Int() | error $[for substraction the type of [ec1] needs to be int],
+		T2 == Int() | error $[for substraction the type of [ec2] needs to be int],
+		@e.type := Int().
+
+
+
+	cexprOk(s, e@Eq(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == T2 | error $[for equality types [T1] and [T2] need to match],
+		@e.type := Bool().
+
+	cexprOk(s, e@NotEq(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		T1 == T2 | error $[for non-equality types [T1] and [T2] need to match],
+		@e.type := Bool().
+
+	cexprOk(s, e@GtEq(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@LtEq(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@Gt(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@Lt(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == Int(),
+		cexprOk(s, ec2) == Int(),
+		T1 == T2 | error $[for greater than types [T1] and [T2] need to be int],
+		@e.type := Bool().
+
+	cexprOk(s, e@Is(ec1,ec2)) = Bool() :- {T1 T2}
+		cexprOk(s, ec1) == T1,
+		cexprOk(s, ec2) == T2,
+		notSimpleType(T1) | error $[Is can not operate simple types not on [T1]],
+		notSimpleType(T2) | error $[Is can not operate on simple types not on [T2]],
+		@e.type := Bool().
+		
+	cexprOk(s, e@ExprLit(l)) = T :- 
+		literalOk(s, l) == T,
+		@e.type := T.
+
+	cexprOk(s, e@ListLit([])) = T :- 
+		T == EmptyList(),
+		@e.type := T.
+
+//TODO fix this we need all the elements of the list to be the same??
+	cexprOk(s, e@ListLit(x)) = T :-  {n}
+		x == [n | _],
+		T == exprOk(s, n) | error $[all elements of the list need to be the same?],
+		@e.type := T.
+		
+	cexprOk(s, e@Index(x)) = T :-  
+		indexExprOk(s, x) == T.
+	
+	indexExprOk(s, IndexExpr(name, idx)) = T :-
+		cexprOk(s, name) == T | error $[[name] is not a valid expression],
+		exprOk(s, idx) == Int() | error $[index must be of type int in expr $[idx]].
+
+
+		
+	
+////////////Literals Expressions///////////////////////////////
+	literalOk(s, Integer(x)) = Int().
+	literalOk(s, String(x)) = String().
+	literalOk(s, LitFalse()) = Bool().
+	literalOk(s, LitTrue()) = Bool().
+	literalOk(s, None()) = NoneType().
+		
+
+		
+		
+
+
+		
+

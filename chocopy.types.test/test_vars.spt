@@ -1,0 +1,49 @@
+module test
+
+language chocopy
+start symbol Program
+
+test simple var [[
+a: int = 0
+]] analysis succeeds
+
+test simple var string [[
+a: str = "assdf"
+]] analysis succeeds
+
+test simple var boolean [[
+a: bool = True
+]] analysis succeeds
+
+test simple bad var  [[
+a: int = "0"
+]] analysis fails
+
+test simple list [[
+a: [int] = None
+]] analysis succeeds
+
+test var assign [[
+a: int = 0
+a = 1
+]] analysis succeeds
+
+test resoluton correct [[
+[[a]]: int = 0
+[[a]] = 1
+]] resolve #2 to #1
+
+test var assign bad type [[
+a: int = 0
+a = "asdf"
+]] analysis fails
+
+test list access [[
+a: [int] = None
+a[1]
+]] analysis succeeds
+
+test bad list access [[
+a: [int] = None
+a["asd"]
+]] analysis fails
