@@ -29,10 +29,25 @@ rules
 	defOk: scope * AllDefinitions
 	defsOk maps defOk(*, list(*))
 
+//Functions
+	fnDefOk: scope * FunctionDef -> TYPE
+	fnBodyOk: scope * FunctionBody
+	fnDeclOk: scope * FunctionDeclarations
+	fnDeclsOk maps fnDeclOk(*, list(*))
+	
+//Vars
 	varDefOk: scope * VarDef -> TYPE
 	declareVar: scope * TypedVar -> TYPE
+
+	declGlobalLocalOk: scope * Declaration
+
+	declareVarList: scope * TypedVarList
+	declareVars maps declareVar(*, list(*)) = list(*)
+
 	typedVarToID: scope * TypedVar -> ID
 	typeOfVar: scope * TypedVar -> TYPE
+
+	typeOfVars maps typeOfVar(*, list(*)) = list(*)
 	typeOfType: scope * Type -> TYPE
 
   
@@ -40,7 +55,7 @@ rules
 
 ////////////Syntax///////////////////////////////
 	programOk(Program(defs, block)) :- {s}
-		new s, //TODO fix this
+		new s,
 		s -P-> s,
 		defsOk(s, defs),
 		blockOk(s, block).
@@ -53,6 +68,9 @@ rules
 
 	blockOk(s, Block(ls)) :-
 		stmtsOk(s, ls).
+
+////////////Functions/////////////
+
 		
 ////////////Statements///////////////////////////////
 	stmtOk(s, SimpleStmt(simple)) :-
@@ -128,6 +146,19 @@ rules
 		typeOfType(s, t) == T,
 		!var[id, T] in s,
 		@e.type := T.
+	
+	declareVarList(s,TypedVarList(x))  :- {T}
+		declareVars(s, x) == T.
+
+	declareVarList(s,TypedVarList([])) :- true.
+	
+	//FIX
+	declGlobalLocalOk(s, NonLocal(x)) :- true.
+
+
+	//FIX
+	declGlobalLocalOk(s, Global(x)) :- true.
+		
 		
 
 	typeOfVar(s, TypedVar(x, t)) = T :- {x'}
@@ -145,6 +176,31 @@ rules
 		
 	defOk(s, e@VarDefinition(x)) :- {T}
 		varDefOk(s, x) == T.
+	
+	defOk(s, FunctionDefinition(x)) :- {T}
+		fnDefOk(s, x) == T.
+	
+	fnDefOk(s, e@FnDef(x, listVar, retType, body)) = T :- {s_fn}
+		new s_fn,
+		s_fn -P-> s_fn,
+		typeOfType(s, retType) == T,
+		declareVarList(s_fn, listVar) | error $[declaration of arguments [listVar] in fuction is incorrect],
+		fnBodyOk(s_fn, body),
+		@e.type := T.
+	
+	fnBodyOk(s, FnBody(decls, blk)) :-
+		fnDeclsOk(s, decls),
+		blockOk(s, blk).
+	
+	fnDeclOk(s, FnVarDef(x))  :- {T}
+		varDefOk(s, x) == T.
+
+	fnDeclOk(s, FnFnDef(x))  :- {T}
+		fnDefOk(s, x) == T.
+	
+	fnDeclOk(s, FnLocalGlobals(x))  :- {T}
+		declGlobalLocalOk(s, x).
+		
 
 		
 

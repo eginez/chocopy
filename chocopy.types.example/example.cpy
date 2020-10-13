@@ -1,4 +1,3 @@
-a: int = 0
-b: [int] = None
-for a in b:
-    a = 1
+def f1(a:int) -> int:
+	a = 1
+	return a

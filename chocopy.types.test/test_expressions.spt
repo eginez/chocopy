@@ -49,3 +49,44 @@ else:
 	return True
 ]] analysis succeeds
 
+test if [[
+x: int = 0
+if x % 2 == 1:
+	if True:
+		return 1
+	elif x == 0:
+		return -1
+	else:
+		return 0  
+else:
+	return True
+]] analysis succeeds
+
+test if 2 [[
+x: int = 0
+if True:
+	return x
+elif x == 0:
+	return x+1
+else:
+	return 0  
+]] analysis succeeds
+
+test if 3 [[
+x: int = 0
+if 1:
+	return x
+else:
+	return 0  
+]] analysis fails
+
+test if 4 [[
+x: int = 0
+if True:
+	return x
+elif "a":
+	return 2
+else:
+	return 0  
+]] analysis fails
+
