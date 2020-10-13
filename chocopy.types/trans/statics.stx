@@ -143,8 +143,9 @@ rules
 
 
 	declareVar(s, e@TypedVar(id, t)) = T :-
-		typeOfType(s, t) == T,
+		typeOfType(s, t) == T | error $[can not find type of [t]],
 		!var[id, T] in s,
+		resolveVar(s, id) == [(_,(_,_))] | error $[duplicate declarion of [id]],
 		@e.type := T.
 	
 	declareVarList(s,TypedVarList(x))  :- {T}

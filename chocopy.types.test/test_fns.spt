@@ -15,3 +15,9 @@ def f1(a:int) -> int:
 	a = 1
 	return a
 ]] analysis succeeds
+
+test fnsimple3 [[
+def f1(a:int, b:int) -> int:
+	a = b
+	return a
+]] analysis succeeds
