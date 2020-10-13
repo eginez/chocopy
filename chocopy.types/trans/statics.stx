@@ -38,6 +38,7 @@ rules
 //Vars
 	varDefOk: scope * VarDef -> TYPE
 	declareVar: scope * TypedVar -> TYPE
+	declareVarID: scope * ID * TYPE
 
 	declGlobalLocalOk: scope * Declaration
 
@@ -142,10 +143,13 @@ rules
 		
 
 
+	declareVarID(s, id, T) :-
+		!var[id, T] in s,
+		resolveVar(s, id) == [(_,(_,_))] | error $[duplicate declarion of [id]].
+		
 	declareVar(s, e@TypedVar(id, t)) = T :-
 		typeOfType(s, t) == T | error $[can not find type of [t]],
-		!var[id, T] in s,
-		resolveVar(s, id) == [(_,(_,_))] | error $[duplicate declarion of [id]],
+		declareVarID(s, id, T),
 		@e.type := T.
 	
 	declareVarList(s,TypedVarList(x))  :- {T}
@@ -187,6 +191,7 @@ rules
 		typeOfType(s, retType) == T,
 		declareVarList(s_fn, listVar) | error $[declaration of arguments [listVar] in fuction is incorrect],
 		fnBodyOk(s_fn, body),
+		declareVarID(s,x, T),
 		@e.type := T.
 	
 	fnBodyOk(s, FnBody(decls, blk)) :-

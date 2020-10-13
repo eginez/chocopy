@@ -228,6 +228,13 @@ rules
 	indexExprOk(s, IndexExpr(name, idx)) = T :-
 		cexprOk(s, name) == T | error $[[name] is not a valid expression],
 		exprOk(s, idx) == Int() | error $[index must be of type int in expr $[idx]].
+		
+	
+	//TODO type check arguments
+	cexprOk(s, FuncCall(id, expr)) = T :-
+		typeOfVarID(s, id) == T | error $[can not find function [id]].
+		
+	
 
 
 		

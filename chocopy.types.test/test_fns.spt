@@ -18,6 +18,58 @@ def f1(a:int) -> int:
 
 test fnsimple3 [[
 def f1(a:int, b:int) -> int:
+	c :int = 0
 	a = b
+	c = 1
 	return a
 ]] analysis succeeds
+
+test fnsimple5 [[
+def f1(a:int, b:int) -> int:
+	c :int = 0
+	a = b
+	c = 1
+	return a
+f1(2,3)
+]] analysis succeeds
+
+test fnsimple4 [[
+def f1(a:int, b:int) -> int:
+	a: int = 0
+	return a
+]] analysis fails
+
+
+
+test fnsimple6 [[
+def f1(a:int, b:int) -> int:
+	c :int = 0
+	a = b
+	c = 1
+	return a
+f2(2,3)
+]] analysis fails
+
+test fnsimple6 [[
+f2(2,3)
+]] analysis fails
+
+test fnsimple7 [[
+a: int = 0
+def f1(a:int, b:int) -> int:
+	c :int = 0
+	a = b
+	c = 1
+	return a
+a = f1(2,3)
+]] analysis succeeds
+
+test fnsimple8 [[
+a: bool = True
+def f1(a:int, b:int) -> int:
+	c :int = 0
+	a = b
+	c = 1
+	return a
+a = f1(2,3)
+]] analysis fails
