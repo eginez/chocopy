@@ -1,3 +1,5 @@
-def f1(a:int) -> int:
-	a = 1
-	return a
+class Vector(object):
+	def capacity(self:int) -> int:
+		return len(self.items)
+
+vec:Vector = None

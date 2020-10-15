@@ -31,14 +31,24 @@ rules
 
 //Functions
 	fnDefOk: scope * FunctionDef -> TYPE
+	fnDefsOk maps fnDefOk(*, list(*)) = list(*)
+	
 	fnBodyOk: scope * FunctionBody
 	fnDeclOk: scope * FunctionDeclarations
 	fnDeclsOk maps fnDeclOk(*, list(*))
+
+//Classes
+	clsDefOk: scope * ClassDef -> TYPE
+	clsBodyOk: scope * ClassBody
 	
 //Vars
 	varDefOk: scope * VarDef -> TYPE
+	varDefsOk maps varDefOk(*, list(*)) = list(*)
+
 	declareVar: scope * TypedVar -> TYPE
 	declareVarID: scope * ID * TYPE
+
+	declareClass: scope * ID * TYPE * scope
 
 	declGlobalLocalOk: scope * Declaration
 
@@ -70,7 +80,6 @@ rules
 	blockOk(s, Block(ls)) :-
 		stmtsOk(s, ls).
 
-////////////Functions/////////////
 
 		
 ////////////Statements///////////////////////////////
@@ -135,13 +144,16 @@ rules
 	typeOfType(s, e@TypeID("int")) = Int().
 	typeOfType(s, e@TypeID("str")) = String().
 	typeOfType(s, e@TypeID("bool")) = Bool().
-	typeOfType(s, e@TypeID(x)) = Object().
+	typeOfType(s, e@TypeID("object")) = Object().
+	typeOfType(s, e@TypeID(x)) = ClassType(x).
 	typeOfType(s, e@CollectionType(x)) = T :- {T1}
 		typeOfType(s, x) == T1,
 		T == List(T1),
 		@e.type := List(T1).
 		
-
+	declareClass(s, id, T, s_class) :-
+		!class[id, (T, s_class)] in s,
+		resolveClass(s, id) == [(_,(_,_))] | error $[duplicate declarion for class [id]].
 
 	declareVarID(s, id, T) :-
 		!var[id, T] in s,
@@ -182,6 +194,7 @@ rules
 	defOk(s, e@VarDefinition(x)) :- {T}
 		varDefOk(s, x) == T.
 	
+////////////Functions/////////////
 	defOk(s, FunctionDefinition(x)) :- {T}
 		fnDefOk(s, x) == T.
 	
@@ -193,6 +206,14 @@ rules
 		fnBodyOk(s_fn, body),
 		declareVarID(s,x, T),
 		@e.type := T.
+
+	fnDefOk(s, e@FnDefNoType(x, listVar, body)) = NoneType() :- {s_fn}
+		new s_fn,
+		s_fn -P-> s_fn,
+		declareVarList(s_fn, listVar) | error $[declaration of arguments [listVar] in fuction is incorrect],
+		fnBodyOk(s_fn, body),
+		declareVarID(s,x, NoneType()),
+		@e.type := NoneType().
 	
 	fnBodyOk(s, FnBody(decls, blk)) :-
 		fnDeclsOk(s, decls),
@@ -206,6 +227,26 @@ rules
 	
 	fnDeclOk(s, FnLocalGlobals(x))  :- {T}
 		declGlobalLocalOk(s, x).
+		
+////////////Functions/////////////
+	defOk(s, ClassDefinition(x)) :- {T}
+		clsDefOk(s, x) == T.
+	
+	clsDefOk(s, e@ClsDef(clsId, parentId, body)) = T :-  {T2 s_cls}
+		new s_cls,
+		s_cls -P-> s_cls,
+		typeOfClassID(s, parentId) == T2, //type of parent
+		validClassType(T2) | error $[parent type [T2] is not valid],
+		clsBodyOk(s_cls, body) | error $[body class is not ok],
+		ClassType(clsId) == T,
+		declareClass(s, clsId, T, s_cls),
+		@e.type := T.
+	
+	clsBodyOk(s, ClsBodyEmpty()) :- true.
+	clsBodyOk(s, ClsBody(varDefs, fnDefs)) :-  {T1 T2}
+		varDefsOk(s, varDefs) == T1 | error $[var defs not ok in class],
+		fnDefsOk(s, fnDefs) == T2 | error $[functions defs not ok in class].
+		
 		
 
 		

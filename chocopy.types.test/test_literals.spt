@@ -111,3 +111,11 @@ test list concat [[
 test list concat bad [[
 [1, 2, 3] +  ["asd"]
 ]] analysis fails
+
+test list concat bad [[
+"asd" + "ase"
+]] analysis succeeds
+
+test list of booleans  [[
+[True] + [True]
+]] analysis succeeds

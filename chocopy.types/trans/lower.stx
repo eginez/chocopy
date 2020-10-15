@@ -30,6 +30,7 @@ signature
 
   relations
   	var : ID -> TYPE
+  	class: ID -> (TYPE * scope)
 
  name-resolution
  	labels P
@@ -45,14 +46,20 @@ rules
   indexExprOk: scope * IndexExpr -> TYPE
  
 //Definitions
-	typeOfVarID: scope *ID -> TYPE
+	typeOfVarID: scope * ID -> TYPE
 	resolveVar: scope * ID -> list((path * (ID * TYPE)))
+
+//Class Definiotions
+	typeOfClassID: scope * ID -> TYPE
+	scopeOfClassID: scope * ID -> scope
+	resolveClass: scope * ID -> list((path * (ID * (TYPE * scope))))
 	
 
 //Utils
 	notSimpleType: TYPE
 	sameTypes: TYPE * TYPE
 	canAdd: TYPE * TYPE
+	validClassType: TYPE
   
   
   
@@ -68,11 +75,15 @@ rules
 	notSimpleType(Bool()) :- false.
 
 	sameTypes(x, x) :- true.
-	sameTypes(List(x), NoneType) :- true.
+	sameTypes(List(x), NoneType()) :- true.
+	sameTypes(ClassType(x), NoneType()) :- true.
 
 	canAdd(Int(), Int()).
 	canAdd(String(), String()).
 	canAdd(List(x), List(x)).
+	
+	validClassType(Object()).
+	validClassType(ClassType(x)).
 	
 
 
@@ -83,9 +94,24 @@ rules
 			min $ < P and true
 			in s |-> ps.
 
+	resolveClass(s, x) = ps :-
+		query class
+			filter P* and {x' :- x' == x}
+			min $ < P and true
+			in s |-> ps.
+
 	typeOfVarID(s, x) = T :- {x'}
 		resolveVar(s, x) == [(_,(x', T))],
 		@x.ref := x'.
+
+	typeOfClassID(s, "object") = Object().
+
+	typeOfClassID(s, x) = T :- {x' s_cls}
+		resolveClass(s, x) == [(_,(x', (T, s_cls)))],
+		@x.ref := x'.
+
+	scopeOfClassID(s, x) = s_cls :- {x' T}
+		resolveClass(s, x) == [(_,(x', (T, s_cls)))].
 	
 ////////////Expressions///////////////////////////////
 
@@ -233,6 +259,10 @@ rules
 	//TODO type check arguments
 	cexprOk(s, FuncCall(id, expr)) = T :-
 		typeOfVarID(s, id) == T | error $[can not find function [id]].
+
+	cexprOk(s, FuncCall("len", expr)) = T :- 
+		T == Int().
+		
 		
 	
 

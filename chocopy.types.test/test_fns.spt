@@ -73,3 +73,18 @@ def f1(a:int, b:int) -> int:
 	return a
 a = f1(2,3)
 ]] analysis fails
+
+test fnsimple9 [[
+def f1(a:int, b:int):
+	a = 1
+]] analysis succeeds
+
+
+test class one [[
+class Vector(object):
+	def capacity(self:int) -> int:
+		return len(self.items)
+
+vec:Vector = None
+]] analysis succeeds
+

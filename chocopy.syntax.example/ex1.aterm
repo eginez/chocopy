@@ -1,18 +1,36 @@
-Program(
-  [ VarDefinition(VarDef(TypedVar("a", TypeID("int")), Integer("0")))
-  , VarDefinition(VarDef(TypedVar("b", CollectionType(TypeID("int"))), None()))
-  ]
-, Block(
-    [ SimpleStmt(
-        Expression(
-          Constant(
-            Gt(
-              VarId("a")
-            , Index(IndexExpr(VarId("b"), Constant(ExprLit(Integer("0")))))
+ProgramOne(
+  [ ClassDefinition(
+      ClsDef(
+        "Vector"
+      , "object"
+      , ClsBody(
+          [ VarDef(TypedVar("items", CollectionType(TypeID("int"))), None())
+          , VarDef(TypedVar("size", TypeID("int")), Integer("0"))
+          ]
+        , [ FnDef(
+              "capacity"
+            , TypedVarList([TypedVar("self", TypeID("int"))])
+            , TypeID("int")
+            , FnBody(
+                []
+              , Block(
+                  [ SimpleStmt(
+                      RetSimpleStmt(
+                        Constant(
+                          FuncCall(
+                            "len"
+                          , [Constant(Member(MemberExpr(VarId("self"), "items")))]
+                          )
+                        )
+                      )
+                    )
+                  ]
+                )
+              )
             )
-          )
+          ]
         )
       )
-    ]
-  )
+    )
+  ]
 )

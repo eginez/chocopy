@@ -55,12 +55,13 @@ context-free syntax
 
 	//TODO fix function def to support multiargs
 	FunctionDef.FnDef = "def" ID "(" TypedVarList ")" "->" Type ":" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
+	FunctionDef.FnDefNoType = "def" ID "(" TypedVarList "):" fnBody:FunctionBody {layout(newline-indent "def" fnBody)}
 	FunctionBody.FnBody = fnDecl:FunctionDeclarations* fnStmt:Block {layout(align fnDecl fnStmt)}
 	
 	ClassDef.ClsDef = "class" ID"(" ID ")" ":" clsBody:ClassBody {layout(newline-indent "class" clsBody)}
 	
 	ClassBody.ClsBodyEmpty = "pass"
-	ClassBody.ClsBody = VarDef* FunctionDef+
+	ClassBody.ClsBody = vardefs:VarDef* fndefs:FunctionDef+ {layout (align vardefs fndefs)}
 	ClassBody.ClsBodyVars = defs:VarDef+ {longest-match,prefer, layout(align-list defs)}
 	
 	
