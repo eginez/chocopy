@@ -18,6 +18,8 @@ signature
     NoneType : TYPE
     EmptyList : TYPE
 	Object : TYPE
+	FunType: TYPE * list(TYPE) -> TYPE
+	
 
 // Here you can define the signature of the types you have used in your Statix definiions.
 // This is just an example on how to do it.
@@ -31,6 +33,7 @@ signature
   relations
   	var : ID -> TYPE
   	class: ID -> (TYPE * scope)
+  	func: ID -> (TYPE * list(TYPE))
 
  name-resolution
  	labels P
@@ -48,6 +51,12 @@ rules
 //Definitions
 	typeOfVarID: scope * ID -> TYPE
 	resolveVar: scope * ID -> list((path * (ID * TYPE)))
+
+//Functions
+	resolveFunc: scope * ID -> list((path * (ID * (TYPE * list(TYPE)))))
+	argsOfFunc: scope * ID -> list(TYPE)
+	typeOfFunc: scope * ID -> TYPE
+	
 
 //Class Definiotions
 	typeOfClassID: scope * ID -> TYPE
@@ -94,6 +103,12 @@ rules
 			min $ < P and true
 			in s |-> ps.
 
+	resolveFunc(s, x) = ps :-
+		query func
+			filter P* and {x' :- x' == x}
+			min $ < P and true
+			in s |-> ps.
+
 	resolveClass(s, x) = ps :-
 		query class
 			filter P* and {x' :- x' == x}
@@ -104,6 +119,11 @@ rules
 		resolveVar(s, x) == [(_,(x', T))],
 		@x.ref := x'.
 
+
+	typeOfFunc(s, x) = T :- {x' argTypes}
+		resolveFunc(s, x) == [(_,(x', (T, argTypes)))],
+		@x.ref := x'.
+
 	typeOfClassID(s, "object") = Object().
 
 	typeOfClassID(s, x) = T :- {x' s_cls}
@@ -112,6 +132,9 @@ rules
 
 	scopeOfClassID(s, x) = s_cls :- {x' T}
 		resolveClass(s, x) == [(_,(x', (T, s_cls)))].
+
+	argsOfFunc(s, x) = argTypes :- {x' T}
+		resolveFunc(s, x) == [(_,(x', (T, argTypes)))].
 	
 ////////////Expressions///////////////////////////////
 
@@ -258,7 +281,7 @@ rules
 	
 	//TODO type check arguments
 	cexprOk(s, FuncCall(id, expr)) = T :-
-		typeOfVarID(s, id) == T | error $[can not find function [id]].
+		typeOfFunc(s, id) == T | error $[can not find function [id]].
 
 	cexprOk(s, FuncCall("len", expr)) = T :- 
 		T == Int().

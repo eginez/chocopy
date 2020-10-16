@@ -53,6 +53,7 @@ signature
     String : Type
     ClassType : ID -> Type
     List : Type -> Type
+    FunType: Type * list(Type) -> Type
     NoneType : Type
     EmptyList : Type
 	Object : Type

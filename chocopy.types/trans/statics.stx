@@ -49,10 +49,11 @@ rules
 	declareVarID: scope * ID * TYPE
 
 	declareClass: scope * ID * TYPE * scope
+	declareFunc: scope * ID * TYPE * list(TYPE)
 
 	declGlobalLocalOk: scope * Declaration
 
-	declareVarList: scope * TypedVarList
+	declareVarList: scope * TypedVarList -> list(TYPE)
 	declareVars maps declareVar(*, list(*)) = list(*)
 
 	typedVarToID: scope * TypedVar -> ID
@@ -154,6 +155,11 @@ rules
 	declareClass(s, id, T, s_class) :-
 		!class[id, (T, s_class)] in s,
 		resolveClass(s, id) == [(_,(_,_))] | error $[duplicate declarion for class [id]].
+	
+
+	declareFunc(s, id, FnType, FnArgsTypes) :-
+		!func[id, (FnType, FnArgsTypes)] in s,
+		resolveFunc(s, id) == [(_,(_,_))] | error $[duplicate declarion for function [id]].
 
 	declareVarID(s, id, T) :-
 		!var[id, T] in s,
@@ -164,10 +170,11 @@ rules
 		declareVarID(s, id, T),
 		@e.type := T.
 	
-	declareVarList(s,TypedVarList(x))  :- {T}
+	declareVarList(s,TypedVarList(x)) = T  :- 
 		declareVars(s, x) == T.
 
-	declareVarList(s,TypedVarList([])) :- true.
+	declareVarList(s,TypedVarList([])) = T :-
+		[] == T.
 	
 	//FIX
 	declGlobalLocalOk(s, NonLocal(x)) :- true.
@@ -198,22 +205,24 @@ rules
 	defOk(s, FunctionDefinition(x)) :- {T}
 		fnDefOk(s, x) == T.
 	
-	fnDefOk(s, e@FnDef(x, listVar, retType, body)) = T :- {s_fn}
+	fnDefOk(s, e@FnDef(x, listVar, retType, body)) = fnType :- {T s_fn argTypes}
 		new s_fn,
 		s_fn -P-> s_fn,
 		typeOfType(s, retType) == T,
-		declareVarList(s_fn, listVar) | error $[declaration of arguments [listVar] in fuction is incorrect],
+		declareVarList(s_fn, listVar) == argTypes | error $[declaration of arguments [listVar] in fuction is incorrect],
 		fnBodyOk(s_fn, body),
-		declareVarID(s,x, T),
-		@e.type := T.
+		declareFunc(s, x, T, argTypes),
+		FunType(T, argTypes) == fnType,
+		@e.type := fnType.
 
-	fnDefOk(s, e@FnDefNoType(x, listVar, body)) = NoneType() :- {s_fn}
+	fnDefOk(s, e@FnDefNoType(x, listVar, body)) = fnType :- {s_fn argTypes}
 		new s_fn,
 		s_fn -P-> s_fn,
-		declareVarList(s_fn, listVar) | error $[declaration of arguments [listVar] in fuction is incorrect],
+		declareVarList(s_fn, listVar) == argTypes | error $[declaration of arguments [listVar] in fuction is incorrect],
 		fnBodyOk(s_fn, body),
-		declareVarID(s,x, NoneType()),
-		@e.type := NoneType().
+		declareFunc(s, x, NoneType(), argTypes),
+		FunType(NoneType(), argTypes) == fnType,
+		@e.type := fnType.
 	
 	fnBodyOk(s, FnBody(decls, blk)) :-
 		fnDeclsOk(s, decls),
