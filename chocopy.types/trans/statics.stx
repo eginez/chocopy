@@ -58,6 +58,7 @@ rules
 
 	typedVarToID: scope * TypedVar -> ID
 	typeOfVar: scope * TypedVar -> TYPE
+	typeOfVarCExpr: scope * ExprConstant -> TYPE
 
 	typeOfVars maps typeOfVar(*, list(*)) = list(*)
 	typeOfType: scope * Type -> TYPE
@@ -189,6 +190,10 @@ rules
 		typeOfVarID(s, x) == T,
 		@x.ref := x'.
 
+	typeOfVarCExpr(s, e@VarId(id)) = T :- 
+		typeOfVarID(s, id) == T | error $[can not find type for [id]],
+		@e.type := T.
+
 		
 	varDefOk(s, e@VarDef(tv, l)) = T :- {T1 T2}
 		declareVar(s, tv) == T1,
@@ -213,6 +218,7 @@ rules
 		fnBodyOk(s_fn, body),
 		declareFunc(s, x, T, argTypes),
 		FunType(T, argTypes) == fnType,
+		declareVarID(s, x, fnType),
 		@e.type := fnType.
 
 	fnDefOk(s, e@FnDefNoType(x, listVar, body)) = fnType :- {s_fn argTypes}
@@ -255,6 +261,17 @@ rules
 	clsBodyOk(s, ClsBody(varDefs, fnDefs)) :-  {T1 T2}
 		varDefsOk(s, varDefs) == T1 | error $[var defs not ok in class],
 		fnDefsOk(s, fnDefs) == T2 | error $[functions defs not ok in class].
+	
+	clsBodyOk(s, ClsBodyVars(varDefs)) :- {T1}
+		varDefsOk(s, varDefs) == T1.
+
+	memberExprOk(s, e@MemberExpr(id, membername)) = T :- {T1 classname s_class}
+		typeOfVarCExpr(s, id) == T1,
+		validClassType(T1) | error $[type [T1] is not a class type],
+		idOfClassType(T1) == classname,
+		scopeOfClassID(s, classname) == s_class | error $[can not find class [classname]],
+		typeOfVarID(s_class, membername) == T | error $[can not find member [membername] in type [T1]],
+		@e.type := T.
 		
 		
 

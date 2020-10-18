@@ -39,10 +39,25 @@ a: int = 0
 a = "asdf"
 ]] analysis fails
 
+test list type [[
+a: [int] = None
+[[a]][1]
+]]run get-type on #1 to List(Int()) 
+
 test list access [[
 a: [int] = None
 a[1]
 ]] analysis succeeds
+
+test list creation [[
+a: [int] = None
+a = [1,2]
+]] analysis succeeds
+
+test bad list creation [[
+a: [int] = None
+a = [1,"hey",2]
+]] analysis fails
 
 test bad list access [[
 a: [int] = None

@@ -44,9 +44,12 @@ rules
 
 //Expressions
   exprOk: scope * Expr -> TYPE
+  exprsOk maps exprOk(*, list(*)) = list(*)
   cexprOk: scope * ExprConstant -> TYPE
   literalOk: scope * Literal -> TYPE
   indexExprOk: scope * IndexExpr -> TYPE
+  memberExprOk: scope * MemberExpr -> TYPE
+
  
 //Definitions
 	typeOfVarID: scope * ID -> TYPE
@@ -62,13 +65,14 @@ rules
 	typeOfClassID: scope * ID -> TYPE
 	scopeOfClassID: scope * ID -> scope
 	resolveClass: scope * ID -> list((path * (ID * (TYPE * scope))))
-	
 
 //Utils
 	notSimpleType: TYPE
 	sameTypes: TYPE * TYPE
 	canAdd: TYPE * TYPE
 	validClassType: TYPE
+	idOfClassType: TYPE -> ID
+	elementsEqual: list(TYPE) -> TYPE
   
   
   
@@ -93,7 +97,17 @@ rules
 	
 	validClassType(Object()).
 	validClassType(ClassType(x)).
+
+	idOfClassType(ClassType(x)) = x.
 	
+	elementsEqual([h|r]) = T :- {T1 T2}
+		h == T1,
+		elementsEqual(r) == T2,
+		T1 == T2,
+		T == T1.
+
+	elementsEqual([x]) = x.
+
 
 
 //////////// typeOfVar ///////////////////////////////
@@ -123,6 +137,7 @@ rules
 	typeOfFunc(s, x) = T :- {x' argTypes}
 		resolveFunc(s, x) == [(_,(x', (T, argTypes)))],
 		@x.ref := x'.
+
 
 	typeOfClassID(s, "object") = Object().
 
@@ -265,12 +280,11 @@ rules
 		T == EmptyList(),
 		@e.type := T.
 
-//TODO fix this we need all the elements of the list to be the same??
-	cexprOk(s, e@ListLit(x)) = List(T) :-  {n}
-		x == [n | _],
-		exprOk(s, n) == T | error $[all elements of the list need to be the same?],
-		@e.type := List(T).
-		
+	cexprOk(s, e@ListLit(x)) = List(ST) :-  {LT}
+		exprsOk(s, x) == LT | error $[all elements of the list need to be the same?],
+		elementsEqual(LT) == ST,
+		@e.type := List(ST).
+	
 	cexprOk(s, e@Index(x)) = T :-  
 		indexExprOk(s, x) == T.
 	
@@ -279,19 +293,36 @@ rules
 		exprOk(s, idx) == Int() | error $[index must be of type int in expr $[idx]].
 		
 	
-	//TODO type check arguments
-	cexprOk(s, FuncCall(id, expr)) = T :-
-		typeOfFunc(s, id) == T | error $[can not find function [id]].
+//////Function calls //////
+	cexprOk(s, e@FuncCall(id, expr)) = T :- {T1 T2}
+		typeOfFunc(s, id) == T | error $[can not find function [id]],
+		exprsOk(s, expr) == T1 | error $[error in parameter calls [expr]],
+		argsOfFunc(s, id) == T2 | error $[can not find arguments of function [id]],
+		T1 == T2 | error $[arguments [T1] and parameters [T2] do not match],
+		@e.type := T.
+		
 
+//////Builtin calls //////
 	cexprOk(s, FuncCall("len", expr)) = T :- 
 		T == Int().
+
+	cexprOk(s, FuncCall("print", expr)) = T :- 
+		T == NoneType().
 		
-		
+//////Class operations //////
+	cexprOk(s, e@MemberCall(mexpr, expr)) = rettype :- {T1 T2 argsType}
+		memberExprOk(s, mexpr) == T1,
+		T1 == FunType(rettype, argsType) | error $[[mexpr] is not of type Function],
+		T2 == exprsOk(s, expr) | error $[parameters [expr] are not ok], 
+		argsType == T2 | error $[missmatch between caller args [T2] and function args [argsType]],
+		@e.type := rettype.
+
+	cexprOk(s, e@Member(mexpr)) = T :- 
+		memberExprOk(s, mexpr) == T,
+		@e.type := T.
 	
 
 
-		
-	
 ////////////Literals Expressions///////////////////////////////
 	literalOk(s, Integer(x)) = Int().
 	literalOk(s, String(x)) = String().

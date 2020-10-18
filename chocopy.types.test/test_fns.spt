@@ -79,12 +79,73 @@ def f1(a:int, b:int):
 	a = 1
 ]] analysis succeeds
 
+test fnsimple params [[
+def f1(a:int, b:int):
+	a = 1
+
+f1(0)
+]] analysis fails
+
+test fnsimple params types [[
+def f1(a:int, b:int):
+	a = 1
+
+f1("hi", 2)
+]] analysis fails
+
 
 test class one [[
+a:int = 0
 class Vector(object):
 	def capacity(self:int) -> int:
 		return len(self.items)
+vec:Vector = None
+
+a = 1 + 1
+[[vec]].capacity(2)
+]] run get-type on #1 to ClassType("Vector")
+
+test class bad member [[
+class Vector(object):
+	def capacity(self:int) -> int:
+		return len(self.items)
+vec:Vector = None
+
+[[vec]].cap2(2)
+]] analysis fails
+
+test class bad params [[
+class Vector(object):
+	def capacity(self:int) -> int:
+		return len(self.items)
+vec:Vector = None
+
+vec.capacity("hi")
+]] analysis fails
+
+test class good member [[
+b: int = 0
+class Vector(object):
+	vv:int = 0
 
 vec:Vector = None
+b = vec.vv
 ]] analysis succeeds
+
+test class bad member [[
+class Vector(object):
+	vv:int = 0
+
+vec:Vector = None
+vec.vv1
+]] analysis fails
+
+test class bad member type [[
+b: bool = False
+class Vector(object):
+	vv:int = 0
+
+vec:Vector = None
+b = vec.vv
+]] analysis fails
 

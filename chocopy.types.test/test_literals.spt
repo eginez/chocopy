@@ -104,6 +104,10 @@ test list of many [[
 [1, 2, 3]
 ]] analysis succeeds
 
+test bad list of many [[
+[1, 2, 3, True]
+]] analysis fails
+
 test list concat [[
 [1, 2, 3] + [1]
 ]] analysis succeeds
