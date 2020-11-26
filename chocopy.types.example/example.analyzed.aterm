@@ -1,4 +1,23 @@
-Program(
-  []{TermIndex("example.cpy", 2)}
-, Block([SimpleStmt(Expression(Constant(ExprLit(String("\"asd\""{TermIndex("example.cpy", 3)}){TermIndex("example.cpy", 4)}){TermIndex("example.cpy", 5)}){TermIndex("example.cpy", 6)}){TermIndex("example.cpy", 7)}){TermIndex("example.cpy", 8)}]{TermIndex("example.cpy", 11)}){TermIndex("example.cpy", 12)}
-){TermIndex("example.cpy", 13)}
+ProgramOne(
+  [ FunctionDefinition(
+      FnDef(
+        "contains"{TermIndex("example.cpy", 1)}
+      , TypedVarList([TypedVar("x"{TermIndex("example.cpy", 2)}, TypeID("int"{TermIndex("example.cpy", 3)}){TermIndex("example.cpy", 4)}){TermIndex("example.cpy", 5)}]{TermIndex("example.cpy", 8)}){TermIndex("example.cpy", 9)}
+      , TypeID("bool"{TermIndex("example.cpy", 10)}){TermIndex("example.cpy", 11)}
+      , FnBody(
+          [FnVarDef(VarDef(TypedVar("items"{TermIndex("example.cpy", 12)}, CollectionType(TypeID("int"{TermIndex("example.cpy", 13)}){TermIndex("example.cpy", 14)}){TermIndex("example.cpy", 15)}){TermIndex("example.cpy", 16)}, None(){TermIndex("example.cpy", 17)}){TermIndex("example.cpy", 18)}){TermIndex("example.cpy", 19)}]{TermIndex("example.cpy", 22)}
+        , Block(
+            [ SimpleStmt(
+                TargetSimpleStmt(
+                  TargetIndex(IndexExpr(VarId("items"{TermIndex("example.cpy", 23)}){TermIndex("example.cpy", 24)}, Constant(ExprLit(Integer("0"{TermIndex("example.cpy", 25)}){TermIndex("example.cpy", 26)}){TermIndex("example.cpy", 27)}){TermIndex("example.cpy", 28)}){TermIndex("example.cpy", 29)}){TermIndex("example.cpy", 30)}
+                , Constant(ExprLit(Integer("0"{TermIndex("example.cpy", 31)}){TermIndex("example.cpy", 32)}){TermIndex("example.cpy", 33)}){TermIndex("example.cpy", 34)}
+                ){TermIndex("example.cpy", 35)}
+              ){TermIndex("example.cpy", 36)}
+            , SimpleStmt(RetSimpleStmt(Constant(ExprLit(LitFalse(){TermIndex("example.cpy", 37)}){TermIndex("example.cpy", 38)}){TermIndex("example.cpy", 39)}){TermIndex("example.cpy", 40)}){TermIndex("example.cpy", 41)}
+            ]{TermIndex("example.cpy", 45)}
+          ){TermIndex("example.cpy", 46)}
+        ){TermIndex("example.cpy", 47)}
+      ){TermIndex("example.cpy", 48)}
+    ){TermIndex("example.cpy", 49)}
+  ]{TermIndex("example.cpy", 52)}
+){TermIndex("example.cpy", 53)}

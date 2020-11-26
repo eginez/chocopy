@@ -130,7 +130,7 @@ rules
 			in s |-> ps.
 
 	typeOfVarID(s, x) = T :- {x'}
-		resolveVar(s, x) == [(_,(x', T))],
+		resolveVar(s, x) == [(_,(x', T))] | error $[can not resolve var [x] in [s]],
 		@x.ref := x'.
 
 

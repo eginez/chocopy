@@ -154,7 +154,6 @@ context-free priorities
 
 {
 	left:
-
   	ExprConstant.Index
   	IndexExpr.IndexExpr
   	MemberExpr.MemberExpr

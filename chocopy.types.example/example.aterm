@@ -1,75 +1,25 @@
 ProgramOne(
-  [ amb(
-      [ [ ClassDefinition(
-            ClsDef(
-              "Vector"
-            , "object"
-            , ClsBodyVars(
-                [ VarDef(TypedVar("items", CollectionType(TypeID("int"))), None())
-                , VarDef(TypedVar("size", TypeID("int")), Integer("0"))
-                ]
-              )
-            )
-          )
-        , FunctionDefinition(
-            FnDef(
-              "capacity"
-            , TypedVarList([TypedVar("self", TypeID("int"))])
-            , TypeID("int")
-            , FnBody(
-                []
-              , Block(
-                  [ SimpleStmt(
-                      RetSimpleStmt(
-                        Constant(
-                          FuncCall(
-                            "len"
-                          , [Constant(Member(MemberExpr(VarId("self"), "items")))]
-                          )
-                        )
-                      )
-                    )
-                  ]
-                )
-              )
-            )
-          )
-        ]
-      , [ ClassDefinition(
-            ClsDef(
-              "Vector"
-            , "object"
-            , ClsBody(
-                [ VarDef(TypedVar("items", CollectionType(TypeID("int"))), None())
-                , VarDef(TypedVar("size", TypeID("int")), Integer("0"))
-                ]
-              , [ FnDef(
-                    "capacity"
-                  , TypedVarList([TypedVar("self", TypeID("int"))])
-                  , TypeID("int")
-                  , FnBody(
-                      []
-                    , Block(
-                        [ SimpleStmt(
-                            RetSimpleStmt(
-                              Constant(
-                                FuncCall(
-                                  "len"
-                                , [Constant(Member(MemberExpr(VarId("self"), "items")))]
-                                )
-                              )
-                            )
-                          )
-                        ]
-                      )
-                    )
-                  )
-                ]
-              )
-            )
-          )
-        ]
-      ]
+  [ ClassDefinition(
+      ClsDef(
+        "A"
+      , "object"
+      , ClsBodyVars(
+          [ VarDef(TypedVar("a", TypeID("int")), Integer("0"))
+          , VarDef(TypedVar("b", TypeID("int")), Integer("0"))
+          ]
+        )
+      )
     )
+  , FunctionDefinition(
+      FnDefNoType(
+        "sum"
+      , TypedVarList([])
+      , FnBody(
+          []
+        , Block([SimpleStmt(RetSimpleStmt(Constant(ExprLit(Integer("0")))))])
+        )
+      )
+    )
+  , VarDefinition(VarDef(TypedVar("a", TypeID("A")), None()))
   ]
 )

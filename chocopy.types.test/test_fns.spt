@@ -149,3 +149,23 @@ vec:Vector = None
 b = vec.vv
 ]] analysis fails
 
+test bad class name [[
+class Vector(object):
+	a: int = 0
+
+def f1():
+	return 0
+
+a: Veceee = None
+]] analysis fails
+
+
+test fn lists [[
+# Search in a list
+def contains(x:int) -> bool:
+    items: [int] = None
+    items[0] = 0
+    return False
+]] analysis succeeds
+
+

@@ -1,9 +1,7 @@
-a:int = 0
-class Vector(object):
-	def capacity(self:int) -> int:
-		return len(self.items)
-vec:Vector = None
+class A(object):
+	a:int = 0
+	b:int = 0
+    def sum(self:A) -> int:
+    	return self.a 
 
-
-a = 1 + 1
-vec.capacity(2)
+a:A = None

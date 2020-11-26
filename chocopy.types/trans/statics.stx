@@ -39,7 +39,7 @@ rules
 
 //Classes
 	clsDefOk: scope * ClassDef -> TYPE
-	clsBodyOk: scope * ClassBody
+	clsBodyOk: scope * ClassBody * TYPE
 	
 //Vars
 	varDefOk: scope * VarDef -> TYPE
@@ -62,6 +62,7 @@ rules
 
 	typeOfVars maps typeOfVar(*, list(*)) = list(*)
 	typeOfType: scope * Type -> TYPE
+	typeOk: scope * TYPE
 
   
 rules
@@ -143,14 +144,23 @@ rules
 
 ////////////VarDef///////////////////////////////
 
+	typeOk(s, Int()) :- true.
+	typeOk(s, String()) :- true.
+	typeOk(s, Bool()) :- true.
+	typeOk(s, Object()) :- true.
+	typeOk(s, List(x)) :- 
+	 typeOk(s, x).
+
+	typeOk(s, ClassType(x)) :- {T}
+		typeOfClassID(s, x) == T | error $[can not find class [x]].
+
 	typeOfType(s, e@TypeID("int")) = Int().
 	typeOfType(s, e@TypeID("str")) = String().
 	typeOfType(s, e@TypeID("bool")) = Bool().
 	typeOfType(s, e@TypeID("object")) = Object().
 	typeOfType(s, e@TypeID(x)) = ClassType(x).
-	typeOfType(s, e@CollectionType(x)) = T :- {T1}
-		typeOfType(s, x) == T1,
-		T == List(T1),
+	typeOfType(s, e@CollectionType(x)) = List(T1) :-
+		typeOfType(s, x) == T1 | error $[can not find TYPE of [x]],
 		@e.type := List(T1).
 		
 	declareClass(s, id, T, s_class) :-
@@ -168,7 +178,13 @@ rules
 		
 	declareVar(s, e@TypedVar(id, t)) = T :-
 		typeOfType(s, t) == T | error $[can not find type of [t]],
+		typeOk(s, T) | error $[type [T] is not ok],
 		declareVarID(s, id, T),
+		@e.type := T.
+
+	declareVar(s, e@TypedVar("self", t)) = T :-
+		typeOfType(s, t) == T | error $[can not find type of [t]],
+		declareVarID(s, "self", T),
 		@e.type := T.
 	
 	declareVarList(s,TypedVarList(x)) = T  :- 
@@ -229,6 +245,15 @@ rules
 		declareFunc(s, x, NoneType(), argTypes),
 		FunType(NoneType(), argTypes) == fnType,
 		@e.type := fnType.
+
+	fnDefOk(s, e@FnDefNoType("__init__", arg, body)) = fnType :- {s_fn argTypes n ct CT}
+		new s_fn,
+		s_fn -P-> s_fn,
+		declareVarList(s_fn, arg) == argTypes | error $[declaration of arguments [arg] in fuction is incorrect],
+		fnBodyOk(s_fn, body),
+		declareFunc(s, "__init__", NoneType(), argTypes),
+		FunType(NoneType(), argTypes) == fnType,
+		@e.type := fnType.
 	
 	fnBodyOk(s, FnBody(decls, blk)) :-
 		fnDeclsOk(s, decls),
@@ -250,19 +275,19 @@ rules
 	clsDefOk(s, e@ClsDef(clsId, parentId, body)) = T :-  {T2 s_cls}
 		new s_cls,
 		s_cls -P-> s_cls,
+		declareClass(s, clsId, T, s_cls),
 		typeOfClassID(s, parentId) == T2, //type of parent
 		validClassType(T2) | error $[parent type [T2] is not valid],
-		clsBodyOk(s_cls, body) | error $[body class is not ok],
 		ClassType(clsId) == T,
-		declareClass(s, clsId, T, s_cls),
+		clsBodyOk(s_cls, body, T) | error $[body class is not ok],
 		@e.type := T.
 	
-	clsBodyOk(s, ClsBodyEmpty()) :- true.
-	clsBodyOk(s, ClsBody(varDefs, fnDefs)) :-  {T1 T2}
+	clsBodyOk(s, ClsBodyEmpty(), clsType) :- true.
+	clsBodyOk(s, ClsBody(varDefs, fnDefs), clsType) :-  {T1 T2}
 		varDefsOk(s, varDefs) == T1 | error $[var defs not ok in class],
 		fnDefsOk(s, fnDefs) == T2 | error $[functions defs not ok in class].
 	
-	clsBodyOk(s, ClsBodyVars(varDefs)) :- {T1}
+	clsBodyOk(s, ClsBodyVars(varDefs), clsType) :- {T1}
 		varDefsOk(s, varDefs) == T1.
 
 	memberExprOk(s, e@MemberExpr(id, membername)) = T :- {T1 classname s_class}
@@ -273,8 +298,6 @@ rules
 		typeOfVarID(s_class, membername) == T | error $[can not find member [membername] in type [T1]],
 		@e.type := T.
 		
-		
-
 		
 
 		
